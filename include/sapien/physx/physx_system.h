@@ -28,6 +28,7 @@
 #include <PxPhysicsAPI.h>
 #include <memory>
 #include <set>
+#include <variant>
 
 #ifdef SAPIEN_CUDA
 #include "sapien/utils/cuda.h"
@@ -56,10 +57,8 @@ public:
   virtual void unregisterComponent(std::shared_ptr<PhysxRigidDynamicComponent> component) = 0;
   virtual void unregisterComponent(std::shared_ptr<PhysxRigidStaticComponent> component) = 0;
   virtual void unregisterComponent(std::shared_ptr<PhysxArticulationLinkComponent> component) = 0;
-  virtual std::vector<std::shared_ptr<PhysxRigidDynamicComponent>>
-  getRigidDynamicComponents() const = 0;
-  virtual std::vector<std::shared_ptr<PhysxRigidStaticComponent>>
-  getRigidStaticComponents() const = 0;
+  virtual std::vector<std::shared_ptr<PhysxRigidDynamicComponent>> getRigidDynamicComponents() const = 0;
+  virtual std::vector<std::shared_ptr<PhysxRigidStaticComponent>> getRigidStaticComponents() const = 0;
   virtual std::vector<std::shared_ptr<PhysxArticulationLinkComponent>>
   getArticulationLinkComponents() const = 0;
 
@@ -81,10 +80,18 @@ public:
   void setSceneCollisionId(int id) { mSceneCollisionId = id; }
   int getSceneCollisionId() const { return mSceneCollisionId; }
 
+  /** Re-filter selected actors and discard their contact/manifold/friction history.
+   * Interactions are recreated on the next step. This also changes filtering events
+   * and can wake touching actors; it is not a cache-only operation. */
+  virtual void resetFiltering(std::vector<std::shared_ptr<PhysxRigidBaseComponent>> const &bodies);
+  /** Re-filter all simulation-enabled rigid actors and links owned by one SAPIEN scene. */
+  void resetFilteringScene(std::shared_ptr<Scene> scene);
+
   ~PhysxSystem();
 
 protected:
   PhysxSystem();
+  virtual void beforeResetFiltering() {}
 
   PhysxSceneConfig mSceneConfig;
   std::shared_ptr<PhysxEngine> mEngine;
@@ -107,12 +114,9 @@ public:
   void unregisterComponent(std::shared_ptr<PhysxRigidDynamicComponent> component) override;
   void unregisterComponent(std::shared_ptr<PhysxRigidStaticComponent> component) override;
   void unregisterComponent(std::shared_ptr<PhysxArticulationLinkComponent> component) override;
-  std::vector<std::shared_ptr<PhysxRigidDynamicComponent>>
-  getRigidDynamicComponents() const override;
-  std::vector<std::shared_ptr<PhysxRigidStaticComponent>>
-  getRigidStaticComponents() const override;
-  std::vector<std::shared_ptr<PhysxArticulationLinkComponent>>
-  getArticulationLinkComponents() const override;
+  std::vector<std::shared_ptr<PhysxRigidDynamicComponent>> getRigidDynamicComponents() const override;
+  std::vector<std::shared_ptr<PhysxRigidStaticComponent>> getRigidStaticComponents() const override;
+  std::vector<std::shared_ptr<PhysxArticulationLinkComponent>> getArticulationLinkComponents() const override;
 
   std::unique_ptr<PhysxHitInfo> raycast(Vec3 const &origin, Vec3 const &direction, float distance);
 
@@ -141,6 +145,13 @@ struct PhysxGpuContactPairImpulseQuery {
   CudaArray buffer;
 };
 
+struct PhysxGpuContactPairPointQuery {
+  CudaArray query;
+  CudaArray pointBuffer;
+  CudaArray forceBuffer;
+  CudaArray winnerBuffer;
+};
+
 struct PhysxGpuContactBodyImpulseQuery {
   CudaArray query;
   CudaArray buffer;
@@ -156,12 +167,9 @@ public:
   void unregisterComponent(std::shared_ptr<PhysxRigidDynamicComponent> component) override;
   void unregisterComponent(std::shared_ptr<PhysxRigidStaticComponent> component) override;
   void unregisterComponent(std::shared_ptr<PhysxArticulationLinkComponent> component) override;
-  std::vector<std::shared_ptr<PhysxRigidDynamicComponent>>
-  getRigidDynamicComponents() const override;
-  std::vector<std::shared_ptr<PhysxRigidStaticComponent>>
-  getRigidStaticComponents() const override;
-  std::vector<std::shared_ptr<PhysxArticulationLinkComponent>>
-  getArticulationLinkComponents() const override;
+  std::vector<std::shared_ptr<PhysxRigidDynamicComponent>> getRigidDynamicComponents() const override;
+  std::vector<std::shared_ptr<PhysxRigidStaticComponent>> getRigidStaticComponents() const override;
+  std::vector<std::shared_ptr<PhysxArticulationLinkComponent>> getArticulationLinkComponents() const override;
 
   void step() override;
 
@@ -180,28 +188,22 @@ public:
   void gpuSetCudaStream(uintptr_t stream);
 
   /** handle to the pose-vel buffer for rigid dynamic bodies and links */
-  CudaArrayHandle gpuGetRigidBodyCudaHandle() const { return mCudaRigidBodyBuffer.handle(); }
-  CudaArrayHandle gpuGetRigidDynamicCudaHandle() const { return mCudaRigidDynamicHandle; }
-  CudaArrayHandle gpuGetArticulationLinkCudaHandle() const { return mCudaLinkHandle; }
+  CudaArrayHandle gpuGetRigidBodyCudaHandle() const { return mCudaBodyDataBuffer.handle(); }
+  CudaArrayHandle gpuGetRigidDynamicCudaHandle() const { return mCudaRigidDynamicDataHandle; }
+  CudaArrayHandle gpuGetArticulationLinkCudaHandle() const { return mCudaLinkDataHandle; }
 
-  CudaArrayHandle gpuGetRigidBodyForceCudaHandle() const {
-    return mCudaRigidBodyForceBuffer.handle();
-  }
-  CudaArrayHandle gpuGetRigidDynamicForceCudaHandle() const {
-    return mCudaRigidDynamicForceHandle;
-  }
-  CudaArrayHandle gpuGetRigidBodyTorqueCudaHandle() const {
-    return mCudaRigidBodyTorqueBuffer.handle();
-  }
-  CudaArrayHandle gpuGetRigidDynamicTorqueCudaHandle() const {
-    return mCudaRigidDynamicTorqueHandle;
-  }
+  CudaArrayHandle gpuGetRigidBodyForceCudaHandle() const { return mCudaBodyForceBuffer.handle(); }
+  CudaArrayHandle gpuGetRigidDynamicForceCudaHandle() const { return mCudaRigidDynamicForceHandle; }
+  CudaArrayHandle gpuGetArticulationLinkForceCudaHandle() const { return mCudaLinkForceHandle; }
+
+  CudaArrayHandle gpuGetRigidBodyTorqueCudaHandle() const { return mCudaBodyTorqueBuffer.handle(); }
+  CudaArrayHandle gpuGetRigidDynamicTorqueCudaHandle() const { return mCudaRigidDynamicTorqueHandle; }
+  CudaArrayHandle gpuGetArticulationLinkTorqueCudaHandle() const { return mCudaLinkTorqueHandle; }
 
   CudaArrayHandle gpuGetArticulationQposCudaHandle() const { return mCudaQposHandle; }
   CudaArrayHandle gpuGetArticulationQvelCudaHandle() const { return mCudaQvelHandle; }
   CudaArrayHandle gpuGetArticulationQaccCudaHandle() const { return mCudaQaccHandle; }
   CudaArrayHandle gpuGetArticulationQfCudaHandle() const { return mCudaQfHandle; }
-
   CudaArrayHandle gpuGetArticulationQTargetPosCudaHandle() const { return mCudaQTargetPosHandle; }
   CudaArrayHandle gpuGetArticulationQTargetVelCudaHandle() const { return mCudaQTargetVelHandle; }
 
@@ -210,8 +212,7 @@ public:
   }
 
   void gpuFetchRigidDynamicData();
-  void gpuFetchArticulationLinkPose();
-  void gpuFetchArticulationLinkVel();
+  void gpuFetchArticulationLinkData();
   void gpuFetchArticulationQpos();
   void gpuFetchArticulationQvel();
   void gpuFetchArticulationQacc();
@@ -219,35 +220,53 @@ public:
   void gpuFetchArticulationQTargetVel();
   void gpuFetchArticulationLinkIncomingJointForce();
 
-  void gpuApplyRigidDynamicData(CudaArrayHandle const &indices);
-  void gpuApplyArticulationRootPose(CudaArrayHandle const &indices);
-  void gpuApplyArticulationRootVel(CudaArrayHandle const &indices);
-  void gpuApplyArticulationQpos(CudaArrayHandle const &indices);
-  void gpuApplyArticulationQvel(CudaArrayHandle const &indices);
-  void gpuApplyArticulationQf(CudaArrayHandle const &indices);
-  void gpuApplyArticulationQTargetPos(CudaArrayHandle const &indices);
-  void gpuApplyArticulationQTargetVel(CudaArrayHandle const &indices);
+  void gpuUpdateArticulationKinematics();
 
   void gpuApplyRigidDynamicData();
+  void gpuApplyArticulationRootData();
+
   void gpuApplyRigidDynamicForce();
   void gpuApplyRigidDynamicTorque();
-  void gpuApplyArticulationRootPose();
-  void gpuApplyArticulationRootVel();
+  void gpuApplyLinkForce();
+  void gpuApplyLinkTorque();
+
   void gpuApplyArticulationQpos();
   void gpuApplyArticulationQvel();
   void gpuApplyArticulationQf();
   void gpuApplyArticulationQTargetPos();
   void gpuApplyArticulationQTargetVel();
 
-  void gpuUpdateArticulationKinematics();
+  // SAPIEN buffer-row indices (not raw PhysX IDs). Empty selection is a no-op.
+  // Indexed reset uploads are synchronous; no-argument uploads keep their fast path.
+  void gpuApplyRigidDynamicDataIndexed(std::vector<int> const &indices);
+  void gpuApplyArticulationRootDataIndexed(std::vector<int> const &indices);
+  void gpuApplyRigidDynamicForceIndexed(std::vector<int> const &indices);
+  void gpuApplyRigidDynamicTorqueIndexed(std::vector<int> const &indices);
+  void gpuApplyLinkForceIndexed(std::vector<int> const &indices);
+  void gpuApplyLinkTorqueIndexed(std::vector<int> const &indices);
+  void gpuApplyArticulationQposIndexed(std::vector<int> const &indices);
+  void gpuApplyArticulationQvelIndexed(std::vector<int> const &indices);
+  void gpuApplyArticulationQfIndexed(std::vector<int> const &indices);
+  void gpuApplyArticulationQTargetPosIndexed(std::vector<int> const &indices);
+  void gpuApplyArticulationQTargetVelIndexed(std::vector<int> const &indices);
+  void gpuUpdateArticulationKinematicsIndexed(std::vector<int> const &indices);
+
+  using GpuIndexSelection = std::variant<std::vector<int>, CudaArrayHandle>;
+  /** Batch reset by SAPIEN rows; selected articulations include every link. */
+  void gpuResetFiltering(GpuIndexSelection const &rigidBodyIndices,
+                         GpuIndexSelection const &articulationIndices);
 
   std::shared_ptr<PhysxGpuContactPairImpulseQuery> gpuCreateContactPairImpulseQuery(
       std::vector<std::pair<std::shared_ptr<PhysxRigidBaseComponent>,
                             std::shared_ptr<PhysxRigidBaseComponent>>> const &bodyPairs);
-  std::shared_ptr<PhysxGpuContactBodyImpulseQuery> gpuCreateContactBodyImpulseQuery(
-      std::vector<std::shared_ptr<PhysxRigidBaseComponent>> const &bodies);
+  std::shared_ptr<PhysxGpuContactPairPointQuery> gpuCreateContactPairPointQuery(
+      std::vector<std::pair<std::shared_ptr<PhysxRigidBaseComponent>,
+                            std::shared_ptr<PhysxRigidBaseComponent>>> const &bodyPairs);
+  std::shared_ptr<PhysxGpuContactBodyImpulseQuery>
+  gpuCreateContactBodyImpulseQuery(std::vector<std::shared_ptr<PhysxRigidBaseComponent>> const &bodies);
 
   void gpuQueryContactPairImpulses(PhysxGpuContactPairImpulseQuery const &query);
+  void gpuQueryContactPairPoints(PhysxGpuContactPairPointQuery const &query);
   void gpuQueryContactBodyImpulses(PhysxGpuContactBodyImpulseQuery const &query);
 
   void syncPosesGpuToCpu();
@@ -265,6 +284,12 @@ public:
 private:
   std::shared_ptr<Device> mDevice;
   void ensureCudaDevice();
+  void checkGpuIdle() const;
+  void beforeResetFiltering() override;
+  std::vector<int> readResetIndices(GpuIndexSelection const &indices, size_t rowCount);
+  void gpuApplyBodyDataIndexed(std::vector<int> const &indices, bool articulation);
+  void gpuApplyRowsIndexed(std::vector<int> const &indices, CudaArrayHandle source,
+                           bool articulation, int type);
 
   std::map<std::weak_ptr<Scene>, Vec3, std::owner_less<>> mSceneOffset;
 
@@ -275,44 +300,60 @@ private:
   uint64_t mTotalSteps{};
 
   bool mGpuInitialized{false};
-
-  // cache values updated in gpuInit
-  int mGpuArticulationCount{-1};
-  int mGpuArticulationMaxDof{-1};
-  int mGpuArticulationMaxLinkCount{-1};
+  bool mStepInProgress{false};
+  bool mContactInvalidatedByReset{false};
 
   CudaEvent mCudaEventRecord;
   CudaEvent mCudaEventWait;
   cudaStream_t mCudaStream{0};
 
-  CudaArray mCudaRigidDynamicScratch;
-  CudaArray mCudaLinkPoseScratch;
-  CudaArray mCudaLinkVelScratch;
-  CudaArray mCudaRigidDynamicIndexScratch;
-  CudaArray mCudaArticulationIndexScratch;
-
   void allocateCudaBuffers();
 
-  // indx buffer for all rigid dynamic bodies
+  // internal
   CudaArray mCudaRigidDynamicIndexBuffer;
   CudaArray mCudaRigidDynamicOffsetBuffer;
-
-  // index buffer for all articulations
   CudaArray mCudaArticulationIndexBuffer;
   CudaArray mCudaArticulationOffsetBuffer;
+  // Non-owning row lookup for batched history reset, rebuilt by gpu_init.
+  std::vector<std::weak_ptr<PhysxRigidDynamicComponent>> mGpuRigidDynamicRows;
+  std::vector<std::weak_ptr<PhysxArticulation>> mGpuArticulationRows;
 
-  CudaArray mCudaRigidBodyBuffer;
-  CudaArrayHandle mCudaRigidDynamicHandle;
-  CudaArrayHandle mCudaLinkHandle;
+  // internal
+  CudaArray mCudaBodyPoseBuffer;
+  CudaArrayHandle mCudaRigidDynamicPoseHandle;
+  CudaArrayHandle mCudaLinkPoseHandle;
 
-  CudaArray mCudaRigidBodyForceBuffer;
+  // internal
+  CudaArray mCudaBodyLinearVelocityBuffer;
+  CudaArrayHandle mCudaRigidDynamicLinearVelocityHandle;
+  CudaArrayHandle mCudaLinkLinearVelocityHandle;
+
+  // internal
+  CudaArray mCudaBodyAngularVelocityBuffer;
+  CudaArrayHandle mCudaRigidDynamicAngularVelocityHandle;
+  CudaArrayHandle mCudaLinkAngularVelocityHandle;
+
+  // internal
+  CudaArray mCudaRootPoseBuffer;
+  CudaArray mCudaRootLinearVelocityBuffer;
+  CudaArray mCudaRootAngularVelocityBuffer;
+
+  // external
+  CudaArray mCudaBodyDataBuffer;
+  CudaArrayHandle mCudaRigidDynamicDataHandle;
+  CudaArrayHandle mCudaLinkDataHandle;
+
+  // external
+  CudaArray mCudaBodyForceBuffer;
   CudaArrayHandle mCudaRigidDynamicForceHandle;
+  CudaArrayHandle mCudaLinkForceHandle;
 
-  CudaArray mCudaRigidBodyTorqueBuffer;
+  // external
+  CudaArray mCudaBodyTorqueBuffer;
   CudaArrayHandle mCudaRigidDynamicTorqueHandle;
+  CudaArrayHandle mCudaLinkTorqueHandle;
 
-  CudaHostArray mCudaHostRigidBodyBuffer;
-
+  // internal & external
   CudaArray mCudaArticulationBuffer;
   CudaArrayHandle mCudaQposHandle;
   CudaArrayHandle mCudaQvelHandle;
@@ -321,15 +362,29 @@ private:
   CudaArrayHandle mCudaQTargetPosHandle;
   CudaArrayHandle mCudaQTargetVelHandle;
 
+  // internal & external
   CudaArray mCudaArticulationLinkIncomingJointForceBuffer;
+  CudaHostArray mCudaHostBodyBuffer;
 
   CudaArray mCudaContactBuffer;
   CudaArray mCudaContactCount;
 
+  /**
+   * Indicates some perperties are applied but step has not been called.
+   *
+   * This is used to detect the common user error where they assume contacts can
+   * update without stepping */
+  bool mApplyPositionWithoutStep{false};
+
+  /**
+   * Indicates the contact buffer is holding up-to-date contact data
+   * set to true after copyContactData
+   * set to false after step */
   bool mContactUpToDate{false};
   int mContactCount{0}; // current contact count, valid only when contactUpdaToDate is true
   void copyContactData();
 };
+
 #else
 class PhysxSystemGpu : public PhysxSystem {
 public:

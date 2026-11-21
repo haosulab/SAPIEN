@@ -2,7 +2,7 @@ if(TARGET physx5)
   return()
 endif()
 
-set(PHYSX_VERSION 105.1-physx-5.3.1.patch0)
+set(PHYSX_VERSION 112.0-physx-5.11.0.patch0)
 
 if (IS_DIRECTORY ${SAPIEN_PHYSX5_DIR})
   # Use provided PhysX5
@@ -13,30 +13,30 @@ else()
   if (APPLE)
     FetchContent_Declare(
       physx5
-      URL https://github.com/sapien-sim/physx-precompiled/releases/download/${PHYSX_VERSION}/macOS-universal-release.zip
-      URL_HASH MD5=3156af2509410dffaffa84c84cbae188
+      URL https://github.com/sapien-sim/PhysX/releases/download/${PHYSX_VERSION}/macOS-universal-release.zip
+      URL_HASH SHA256=08f7a98081d513379a4247e7bb72c7862254c871f9cca9ebdf2459a0229139a6
     )
   elseif (UNIX)
     if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64")
 
       FetchContent_Declare(
         physx5
-        URL https://github.com/sapien-sim/physx-precompiled/releases/download/${PHYSX_VERSION}/linux-aarch64-release.zip
-        URL_HASH MD5=21cbdce291de6bfed4eb14832b64087a
+        URL https://github.com/sapien-sim/PhysX/releases/download/${PHYSX_VERSION}/linux-aarch64-release.zip
+        URL_HASH SHA256=d2eb7f24ca437a0809f7b7a05039581663e7545e7718f16f6f53c27b26a36ab5
       )
 
     else ()
       if (CMAKE_BUILD_TYPE STREQUAL "Debug")
         FetchContent_Declare(
           physx5
-          URL https://github.com/sapien-sim/physx-precompiled/releases/download/${PHYSX_VERSION}/linux-checked.zip
-          URL_HASH MD5=8379bf7ba4d6a0866404fd8a11cc10c2
+          URL https://github.com/sapien-sim/PhysX/releases/download/${PHYSX_VERSION}/linux-checked.zip
+          URL_HASH SHA256=04fc64bf70087783d6692de7f356d28a55a0f3f3c10a2d318362fbd5759bac46
         )
       else ()
         FetchContent_Declare(
           physx5
-          URL https://github.com/sapien-sim/physx-precompiled/releases/download/${PHYSX_VERSION}/linux-release.zip
-          URL_HASH MD5=020222e5441b9ae2779dc05b1f04539c
+          URL https://github.com/sapien-sim/PhysX/releases/download/${PHYSX_VERSION}/linux-release.zip
+          URL_HASH SHA256=7033ea98fa4bc48b90839352cbd0a1f529c36131fd49873d446d1630bf63c572
         )
       endif ()
     endif ()
@@ -44,8 +44,8 @@ else()
   elseif (WIN32)
     FetchContent_Declare(
       physx5
-      URL https://github.com/sapien-sim/physx-precompiled/releases/download/${PHYSX_VERSION}/windows-release.zip
-      URL_HASH MD5=77299ac291e17df438c090d565167d93
+      URL https://github.com/sapien-sim/PhysX/releases/download/${PHYSX_VERSION}/windows-release.zip
+      URL_HASH SHA256=b4c7a97e6f09d75b4109fbf87f79fa756c004648da682b7ac1a5377430a8eddd
     )
   endif()
   FetchContent_MakeAvailable(physx5)
@@ -91,7 +91,7 @@ if (WIN32)
   target_include_directories(physx5 SYSTEM INTERFACE $<BUILD_INTERFACE:${physx5_SOURCE_DIR}/include>)
   target_link_directories(physx5 INTERFACE $<BUILD_INTERFACE:${physx5_SOURCE_DIR}/bin/win.x86_64.vc143.mt/release>)
   target_link_libraries(physx5 INTERFACE
-    PhysXVehicle2_static_64.lib PhysXExtensions_static_64.lib
+    PhysXExtensions_static_64.lib
     PhysXVehicle_static_64.lib PhysX_static_64.lib PhysXPvdSDK_static_64.lib
     PhysXCooking_static_64.lib PhysXCommon_static_64.lib
     PhysXCharacterKinematic_static_64.lib PhysXFoundation_static_64.lib)

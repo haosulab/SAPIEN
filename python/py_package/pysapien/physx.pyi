@@ -5,7 +5,7 @@ import pybind11_stubgen.typing_ext
 import sapien.pysapien
 import sapien.pysapien_pinocchio
 import typing
-__all__ = ['PhysxArticulation', 'PhysxArticulationJoint', 'PhysxArticulationLinkComponent', 'PhysxBaseComponent', 'PhysxBodyConfig', 'PhysxCollisionShape', 'PhysxCollisionShapeBox', 'PhysxCollisionShapeCapsule', 'PhysxCollisionShapeConvexMesh', 'PhysxCollisionShapeCylinder', 'PhysxCollisionShapePlane', 'PhysxCollisionShapeSphere', 'PhysxCollisionShapeTriangleMesh', 'PhysxContact', 'PhysxContactPoint', 'PhysxCpuSystem', 'PhysxDistanceJointComponent', 'PhysxDriveComponent', 'PhysxEngine', 'PhysxGearComponent', 'PhysxGpuContactBodyImpulseQuery', 'PhysxGpuContactPairImpulseQuery', 'PhysxGpuSystem', 'PhysxJointComponent', 'PhysxMaterial', 'PhysxRayHit', 'PhysxRigidBaseComponent', 'PhysxRigidBodyComponent', 'PhysxRigidDynamicComponent', 'PhysxRigidStaticComponent', 'PhysxSDFConfig', 'PhysxSceneConfig', 'PhysxShapeConfig', 'PhysxSystem', 'clear_cache', 'get_body_config', 'get_default_material', 'get_scene_config', 'get_sdf_config', 'get_shape_config', 'is_gpu_enabled', 'set_body_config', 'set_default_material', 'set_gpu_memory_config', 'set_scene_config', 'set_sdf_config', 'set_shape_config', 'version']
+__all__ = ['PhysxArticulation', 'PhysxArticulationJoint', 'PhysxArticulationLinkComponent', 'PhysxArticulationSpatialTendon', 'PhysxBaseComponent', 'PhysxBodyConfig', 'PhysxCollisionShape', 'PhysxCollisionShapeBox', 'PhysxCollisionShapeCapsule', 'PhysxCollisionShapeConvexMesh', 'PhysxCollisionShapeCylinder', 'PhysxCollisionShapePlane', 'PhysxCollisionShapeSphere', 'PhysxCollisionShapeTriangleMesh', 'PhysxContact', 'PhysxContactPoint', 'PhysxCpuSystem', 'PhysxDistanceJointComponent', 'PhysxDriveComponent', 'PhysxEngine', 'PhysxGearComponent', 'PhysxGpuContactBodyImpulseQuery', 'PhysxGpuContactPairImpulseQuery', 'PhysxGpuContactPairPointQuery', 'PhysxGpuSystem', 'PhysxJointComponent', 'PhysxMaterial', 'PhysxRayHit', 'PhysxRigidBaseComponent', 'PhysxRigidBodyComponent', 'PhysxRigidDynamicComponent', 'PhysxRigidStaticComponent', 'PhysxSDFConfig', 'PhysxSceneConfig', 'PhysxShapeConfig', 'PhysxSystem', 'clear_cache', 'get_body_config', 'get_default_material', 'get_scene_config', 'get_sdf_config', 'get_shape_config', 'is_gpu_enabled', 'set_body_config', 'set_default_material', 'set_gpu_memory_config', 'set_scene_config', 'set_sdf_config', 'set_shape_config', 'version']
 class PhysxArticulation:
     name: str
     pose: sapien.pysapien.Pose
@@ -27,6 +27,12 @@ class PhysxArticulation:
         ...
     def create_fixed_tendon(self, link_chain: list[PhysxArticulationLinkComponent], coefficients: list[float], recip_coefficients: list[float], rest_length: float = 0, offset: float = 0, stiffness: float = 0, damping: float = 0, low: float = -3.4028234663852886e+38, high: float = 3.4028234663852886e+38, limit_stiffness: float = 0) -> None:
         ...
+    def create_mimic_joint(self, joint_a: PhysxArticulationJoint, joint_b: PhysxArticulationJoint, multiplier: float, offset: float) -> None:
+        """
+        joint_a_value = joint_b_value * multiplier + offset
+        """
+    def create_spatial_tendon(self, links: list[PhysxArticulationLinkComponent], parents: list[int], coefficients: list[float], attachment_offsets: list[numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]], rest_lengths: list[float], limits: list[tuple[float, float]], stiffness: float, damping: float, limit_stiffness: float) -> PhysxArticulationSpatialTendon:
+        ...
     def find_joint_by_name(self, name: str) -> PhysxArticulationJoint:
         ...
     def find_link_by_name(self, name: str) -> PhysxArticulationLinkComponent:
@@ -34,6 +40,8 @@ class PhysxArticulation:
     def get_active_joints(self) -> list[PhysxArticulationJoint]:
         ...
     def get_dof(self) -> int:
+        ...
+    def get_gpu_data_index(self) -> int:
         ...
     def get_gpu_index(self) -> int:
         ...
@@ -75,6 +83,8 @@ class PhysxArticulation:
         ...
     def get_solver_velocity_iterations(self) -> int:
         ...
+    def get_spatial_tendons(self) -> list[PhysxArticulationSpatialTendon]:
+        ...
     def set_name(self, name: str) -> None:
         ...
     def set_pose(self, pose: sapien.pysapien.Pose) -> None:
@@ -105,6 +115,11 @@ class PhysxArticulation:
     @property
     def dof(self) -> int:
         ...
+    @property
+    def gpu_data_index(self) -> int:
+        """
+        SAPIEN articulation buffer row for indexed GPU operations, after gpu_init.
+        """
     @property
     def gpu_index(self) -> int:
         ...
@@ -340,6 +355,30 @@ class PhysxArticulationLinkComponent(PhysxRigidBodyComponent):
     @property
     def sleeping(self) -> bool:
         ...
+class PhysxArticulationSpatialTendon:
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
+    def get_attachment_offsets(self) -> list[numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]]:
+        ...
+    def get_coefficients(self) -> list[float]:
+        ...
+    def get_damping(self) -> float:
+        ...
+    def get_links(self) -> list[PhysxArticulationLinkComponent]:
+        ...
+    def get_offset(self) -> float:
+        ...
+    def get_parent_indices(self) -> list[int]:
+        ...
+    def get_stiffness(self) -> float:
+        ...
+    def set_damping(self, damping: float) -> None:
+        ...
+    def set_offset(self, offset: float) -> None:
+        ...
+    def set_stiffness(self, stiffness: float) -> None:
+        ...
 class PhysxBaseComponent(sapien.pysapien.Component):
     @staticmethod
     def _pybind11_conduit_v1_(*args, **kwargs):
@@ -370,6 +409,8 @@ class PhysxCollisionShape:
     @staticmethod
     def _pybind11_conduit_v1_(*args, **kwargs):
         ...
+    def compute_global_aabb_tight(self) -> numpy.ndarray[tuple[typing.Literal[2], typing.Literal[3]], numpy.dtype[numpy.float32]]:
+        ...
     def get_collision_groups(self) -> typing.Annotated[list[int], pybind11_stubgen.typing_ext.FixedSize(4)]:
         ...
     @typing.overload
@@ -379,6 +420,8 @@ class PhysxCollisionShape:
     def get_contact_offset(self) -> float:
         ...
     def get_density(self) -> float:
+        ...
+    def get_local_aabb(self) -> numpy.ndarray[tuple[typing.Literal[2], typing.Literal[3]], numpy.dtype[numpy.float32]]:
         ...
     def get_local_pose(self) -> sapien.pysapien.Pose:
         ...
@@ -429,6 +472,9 @@ class PhysxCollisionShape:
     @property
     def collision_groups(self) -> typing.Annotated[list[int], pybind11_stubgen.typing_ext.FixedSize(4)]:
         ...
+    @property
+    def get_global_aabb_fast(self) -> numpy.ndarray[tuple[typing.Literal[2], typing.Literal[3]], numpy.dtype[numpy.float32]]:
+        ...
 class PhysxCollisionShapeBox(PhysxCollisionShape):
     @staticmethod
     def _pybind11_conduit_v1_(*args, **kwargs):
@@ -474,6 +520,8 @@ class PhysxCollisionShapeConvexMesh(PhysxCollisionShape):
     def get_triangles(self) -> typing.Annotated[numpy.typing.NDArray[numpy.uint32], "[m, 3]"]:
         ...
     def get_vertices(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 3]"]:
+        ...
+    def set_scale(self, scale: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] | list[float] | tuple) -> None:
         ...
     @property
     def scale(self) -> numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]:
@@ -532,6 +580,8 @@ class PhysxCollisionShapeTriangleMesh(PhysxCollisionShape):
     def get_triangles(self) -> typing.Annotated[numpy.typing.NDArray[numpy.uint32], "[m, 3]"]:
         ...
     def get_vertices(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 3]"]:
+        ...
+    def set_scale(self, scale: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] | list[float] | tuple) -> None:
         ...
     @property
     def scale(self) -> numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]:
@@ -701,6 +751,16 @@ class PhysxGpuContactPairImpulseQuery:
     @property
     def cuda_impulses(self) -> sapien.pysapien.CudaArray:
         ...
+class PhysxGpuContactPairPointQuery:
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
+    @property
+    def impulses(self) -> sapien.pysapien.CudaArray:
+        ...
+    @property
+    def points(self) -> sapien.pysapien.CudaArray:
+        ...
 class PhysxGpuSystem(PhysxSystem):
     @staticmethod
     def _pybind11_conduit_v1_(*args, **kwargs):
@@ -714,60 +774,104 @@ class PhysxGpuSystem(PhysxSystem):
     def get_scene_offset(self, scene: sapien.pysapien.Scene) -> numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]:
         ...
     @typing.overload
+    def gpu_apply_articulation_link_force(self) -> None:
+        ...
+    @typing.overload
+    def gpu_apply_articulation_link_force(self, indices: list[int]) -> None:
+        """
+        Use selected SAPIEN buffer rows; a unique CPU integer sequence. Empty means no-op. Indexed operations synchronize before returning.
+        """
+    @typing.overload
+    def gpu_apply_articulation_link_torque(self) -> None:
+        ...
+    @typing.overload
+    def gpu_apply_articulation_link_torque(self, indices: list[int]) -> None:
+        """
+        Use selected SAPIEN buffer rows; a unique CPU integer sequence. Empty means no-op. Indexed operations synchronize before returning.
+        """
+    @typing.overload
     def gpu_apply_articulation_qf(self) -> None:
         ...
     @typing.overload
-    def gpu_apply_articulation_qf(self, index_buffer: sapien.pysapien.CudaArray) -> None:
-        ...
+    def gpu_apply_articulation_qf(self, indices: list[int]) -> None:
+        """
+        Use selected SAPIEN buffer rows; a unique CPU integer sequence. Empty means no-op. Indexed operations synchronize before returning.
+        """
     @typing.overload
     def gpu_apply_articulation_qpos(self) -> None:
         ...
     @typing.overload
-    def gpu_apply_articulation_qpos(self, index_buffer: sapien.pysapien.CudaArray) -> None:
-        ...
+    def gpu_apply_articulation_qpos(self, indices: list[int]) -> None:
+        """
+        Use selected SAPIEN buffer rows; a unique CPU integer sequence. Empty means no-op. Indexed operations synchronize before returning.
+        """
     @typing.overload
     def gpu_apply_articulation_qvel(self) -> None:
         ...
     @typing.overload
-    def gpu_apply_articulation_qvel(self, index_buffer: sapien.pysapien.CudaArray) -> None:
+    def gpu_apply_articulation_qvel(self, indices: list[int]) -> None:
+        """
+        Use selected SAPIEN buffer rows; a unique CPU integer sequence. Empty means no-op. Indexed operations synchronize before returning.
+        """
+    @typing.overload
+    def gpu_apply_articulation_root_data(self) -> None:
         ...
     @typing.overload
+    def gpu_apply_articulation_root_data(self, indices: list[int]) -> None:
+        """
+        Use selected SAPIEN buffer rows; a unique CPU integer sequence. Empty means no-op. Indexed operations synchronize before returning.
+        """
     def gpu_apply_articulation_root_pose(self) -> None:
         ...
-    @typing.overload
-    def gpu_apply_articulation_root_pose(self, index_buffer: sapien.pysapien.CudaArray) -> None:
-        ...
-    @typing.overload
     def gpu_apply_articulation_root_velocity(self) -> None:
-        ...
-    @typing.overload
-    def gpu_apply_articulation_root_velocity(self, index_buffer: sapien.pysapien.CudaArray) -> None:
         ...
     @typing.overload
     def gpu_apply_articulation_target_position(self) -> None:
         ...
     @typing.overload
-    def gpu_apply_articulation_target_position(self, index_buffer: sapien.pysapien.CudaArray) -> None:
-        ...
+    def gpu_apply_articulation_target_position(self, indices: list[int]) -> None:
+        """
+        Use selected SAPIEN buffer rows; a unique CPU integer sequence. Empty means no-op. Indexed operations synchronize before returning.
+        """
     @typing.overload
     def gpu_apply_articulation_target_velocity(self) -> None:
         ...
     @typing.overload
-    def gpu_apply_articulation_target_velocity(self, index_buffer: sapien.pysapien.CudaArray) -> None:
-        ...
+    def gpu_apply_articulation_target_velocity(self, indices: list[int]) -> None:
+        """
+        Use selected SAPIEN buffer rows; a unique CPU integer sequence. Empty means no-op. Indexed operations synchronize before returning.
+        """
     @typing.overload
     def gpu_apply_rigid_dynamic_data(self) -> None:
         ...
     @typing.overload
-    def gpu_apply_rigid_dynamic_data(self, index_buffer: sapien.pysapien.CudaArray) -> None:
-        ...
+    def gpu_apply_rigid_dynamic_data(self, indices: list[int]) -> None:
+        """
+        Use selected SAPIEN buffer rows; a unique CPU integer sequence. Empty means no-op. Indexed operations synchronize before returning.
+        """
+    @typing.overload
     def gpu_apply_rigid_dynamic_force(self) -> None:
         ...
+    @typing.overload
+    def gpu_apply_rigid_dynamic_force(self, indices: list[int]) -> None:
+        """
+        Use selected SAPIEN buffer rows; a unique CPU integer sequence. Empty means no-op. Indexed operations synchronize before returning.
+        """
+    @typing.overload
     def gpu_apply_rigid_dynamic_torque(self) -> None:
         ...
+    @typing.overload
+    def gpu_apply_rigid_dynamic_torque(self, indices: list[int]) -> None:
+        """
+        Use selected SAPIEN buffer rows; a unique CPU integer sequence. Empty means no-op. Indexed operations synchronize before returning.
+        """
     def gpu_create_contact_body_impulse_query(self, bodies: list[PhysxRigidBaseComponent]) -> PhysxGpuContactBodyImpulseQuery:
         ...
     def gpu_create_contact_pair_impulse_query(self, body_pairs: list[tuple[PhysxRigidBaseComponent, PhysxRigidBaseComponent]]) -> PhysxGpuContactPairImpulseQuery:
+        ...
+    def gpu_create_contact_pair_point_query(self, body_pairs: list[tuple[PhysxRigidBaseComponent, PhysxRigidBaseComponent]]) -> PhysxGpuContactPairPointQuery:
+        ...
+    def gpu_fetch_articulation_link_data(self) -> None:
         ...
     def gpu_fetch_articulation_link_incoming_joint_forces(self) -> None:
         ...
@@ -796,16 +900,20 @@ class PhysxGpuSystem(PhysxSystem):
         """
     def gpu_query_contact_body_impulses(self, query: PhysxGpuContactBodyImpulseQuery) -> None:
         """
-        Query net contact forces for specific bodies of the last simulation step.
-        Usage:
-            query = system.gpu_create_contact_body_force_query(bodies)  # create force query in advance
-        
-            # after simulation step
-            system.gpu_query_contact_body_forces(query)
-            # query.cuda_buffer is now filled with net contact forces for each body
+        Sum world-frame normal contact impulses (N s) on each queried body. Friction impulses are not included. Results cover the last physics step.
         """
     def gpu_query_contact_pair_impulses(self, query: PhysxGpuContactPairImpulseQuery) -> None:
-        ...
+        """
+        Sum world-frame normal contact impulses (N s) on the first body of each pair. Friction impulses are not included. Results cover the last physics step.
+        """
+    def gpu_query_contact_pair_points(self, query: PhysxGpuContactPairPointQuery) -> None:
+        """
+        Select the strongest positive normal contact impulse across all shapes of each pair. The point is its patch's unweighted mean in native world coordinates, not a center of pressure. Both outputs are zero when no positive impulse exists. The impulse acts on the first body and is not the summed pair impulse.
+        """
+    def gpu_reset_filtering(self, rigid_body_indices: list[int] | sapien.pysapien.CudaArray = [], articulation_indices: list[int] | sapien.pysapien.CudaArray = []) -> None:
+        """
+        Re-filter a batch of SAPIEN body/articulation rows in one native call. Each selection is a CPU integer sequence or a contiguous int32/int64 CudaArray. All links of selected articulations are included. CUDA indices are copied to CPU in bulk on the configured stream; the operation synchronizes before returning.
+        """
     def gpu_set_cuda_stream(self, stream: int) -> None:
         """
         PhysX GPU APIs will be synchronized with the provided stream and SAPIEN's CUDA
@@ -814,8 +922,14 @@ class PhysxGpuSystem(PhysxSystem):
         Args:
             stream: integer representation of a cuda stream pointer
         """
+    @typing.overload
     def gpu_update_articulation_kinematics(self) -> None:
         ...
+    @typing.overload
+    def gpu_update_articulation_kinematics(self, indices: list[int]) -> None:
+        """
+        Use selected SAPIEN buffer rows; a unique CPU integer sequence. Empty means no-op. Indexed operations synchronize before returning.
+        """
     def set_scene_offset(self, scene: sapien.pysapien.Scene, offset: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] | list[float] | tuple) -> None:
         """
         In GPU mode, all SAPIEN scenes share the same PhysX scene. One should call this
@@ -838,7 +952,13 @@ class PhysxGpuSystem(PhysxSystem):
     def cuda_articulation_link_data(self) -> sapien.pysapien.CudaArray:
         ...
     @property
+    def cuda_articulation_link_force(self) -> sapien.pysapien.CudaArray:
+        ...
+    @property
     def cuda_articulation_link_incoming_joint_forces(self) -> sapien.pysapien.CudaArray:
+        ...
+    @property
+    def cuda_articulation_link_torque(self) -> sapien.pysapien.CudaArray:
         ...
     @property
     def cuda_articulation_qacc(self) -> sapien.pysapien.CudaArray:
@@ -1187,6 +1307,14 @@ class PhysxSystem(sapien.pysapien.System):
         ...
     def get_timestep(self) -> float:
         ...
+    def reset_filtering(self, bodies: list[PhysxRigidBaseComponent]) -> None:
+        """
+        Discard contact, manifold and friction history for selected rigid actors/links. Re-runs collision filters, can wake touching actors and changes contact events. Call between completed steps, after state uploads/kinematics. GPU contact queries require a new completed step. Unrelated pairs retain their history.
+        """
+    def reset_filtering_scene(self, scene: sapien.pysapien.Scene) -> None:
+        """
+        Re-filter simulation-enabled rigid actors and links owned by this SAPIEN scene. Includes static actors. Any pair touching a selected actor loses its history.
+        """
     def set_scene_collision_id(self, id: int) -> None:
         ...
     def set_timestep(self, timestep: float) -> None:
@@ -1227,7 +1355,7 @@ def set_body_config(config: PhysxBodyConfig) -> None:
     ...
 def set_default_material(static_friction: float, dynamic_friction: float, restitution: float) -> None:
     ...
-def set_gpu_memory_config(temp_buffer_capacity: int = 16777216, max_rigid_contact_count: int = 524288, max_rigid_patch_count: int = 81920, heap_capacity: int = 67108864, found_lost_pairs_capacity: int = 262144, found_lost_aggregate_pairs_capacity: int = 1024, total_aggregate_pairs_capacity: int = 1024, collision_stack_size: int = 4194304) -> None:
+def set_gpu_memory_config(temp_buffer_capacity: int = 16777216, max_rigid_contact_count: int = 524288, max_rigid_patch_count: int = 81920, heap_capacity: int = 67108864, found_lost_pairs_capacity: int = 262144, found_lost_aggregate_pairs_capacity: int = 1024, total_aggregate_pairs_capacity: int = 1024, collision_stack_size: int = 67108864) -> None:
     ...
 @typing.overload
 def set_scene_config(gravity: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] = ..., bounce_threshold: float = 2.0, enable_pcm: bool = True, enable_tgs: bool = True, enable_ccd: bool = False, enable_enhanced_determinism: bool = False, enable_friction_every_iteration: bool = True, cpu_workers: int = 0) -> None:

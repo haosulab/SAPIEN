@@ -85,9 +85,6 @@ public:
   void setInertia(Vec3 inertia);
   void setCMassLocalPose(Pose const &pose);
 
-  bool getAutoComputeMass() const;
-  void setAutoComputeMass(bool enable);
-
   virtual std::shared_ptr<PhysxRigidBaseComponent>
   attachCollision(std::shared_ptr<PhysxCollisionShape> shape) override;
 
@@ -118,11 +115,8 @@ public:
 
 protected:
   void internalUpdateMass();
-  bool canAutoComputeMass();
 
-  bool mAutoComputeMass{true};
-  ::physx::PxMassProperties mMassProperties{0.f, ::physx::PxMat33(::physx::PxZero),
-                                            ::physx::PxVec3(0.f)};
+  ::physx::PxMassProperties mMassProperties{0.f, ::physx::PxMat33(::physx::PxZero), ::physx::PxVec3(0.f)};
 };
 
 class PhysxRigidDynamicComponent : public PhysxRigidBodyComponent {

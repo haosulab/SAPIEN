@@ -18,6 +18,7 @@
 
 #include "articulation.h"
 #include "articulation_link_component.h"
+#include "articulation_tendon.h"
 #include "base_component.h"
 #include "collision_shape.h"
 #include "joint_component.h"

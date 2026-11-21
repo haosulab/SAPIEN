@@ -18,6 +18,7 @@
 #include "../logger.h"
 #include "sapien/math/conversion.h"
 #include "sapien/physx/articulation_link_component.h"
+#include "sapien/physx/articulation_tendon.h"
 #include "sapien/physx/physx_system.h"
 #include "sapien/scene.h"
 
@@ -26,8 +27,7 @@ using namespace physx;
 namespace sapien {
 namespace physx {
 
-static std::shared_ptr<PhysxArticulationLinkComponent>
-shared_link(PhysxArticulationLinkComponent *link) {
+static std::shared_ptr<PhysxArticulationLinkComponent> shared_link(PhysxArticulationLinkComponent *link) {
   return std::static_pointer_cast<PhysxArticulationLinkComponent>(link->shared_from_this());
 }
 
@@ -36,9 +36,8 @@ PhysxArticulation::PhysxArticulation() {
   mPxArticulation = PhysxEngine::Get()->getPxPhysics()->createArticulationReducedCoordinate();
   mPxArticulation->setArticulationFlag(PxArticulationFlag::eDRIVE_LIMITS_ARE_FORCES, true);
 
-  mPxArticulation->setSolverIterationCounts(
-      PhysxDefault::getBodyConfig().solverPositionIterations,
-      PhysxDefault::getBodyConfig().solverVelocityIterations);
+  mPxArticulation->setSolverIterationCounts(PhysxDefault::getBodyConfig().solverPositionIterations,
+                                            PhysxDefault::getBodyConfig().solverVelocityIterations);
   mPxArticulation->setSleepThreshold(PhysxDefault::getBodyConfig().sleepThreshold);
 }
 
@@ -62,16 +61,13 @@ uint32_t PhysxArticulation::getSolverVelocityIterations() const {
   getPxArticulation()->getSolverIterationCounts(pos, vel);
   return vel;
 }
-float PhysxArticulation::getSleepThreshold() const {
-  return getPxArticulation()->getSleepThreshold();
-}
+float PhysxArticulation::getSleepThreshold() const { return getPxArticulation()->getSleepThreshold(); }
 
 // add link must only be called when PxArticulation is not added to scene
 void PhysxArticulation::addLink(PhysxArticulationLinkComponent &link,
                                 PhysxArticulationLinkComponent *parent) {
   mLinks.push_back(&link);
-  auto pxlink = mPxArticulation->createLink(parent ? parent->getPxActor() : nullptr,
-                                            PxTransform{PxIdentity});
+  auto pxlink = mPxArticulation->createLink(parent ? parent->getPxActor() : nullptr, PxTransform{PxIdentity});
   link.internalSetPxLink(pxlink);
 }
 
@@ -120,8 +116,7 @@ void PhysxArticulation::internalEnsureAddedToScene() {
     if (!mScene) {
       mScene = scene.get();
     } else if (mScene != scene.get()) {
-      throw std::runtime_error(
-          "links of the same articulation cannot be added to different scenes");
+      throw std::runtime_error("links of the same articulation cannot be added to different scenes");
     }
     if (scene) {
       mLinksAddedToScene++;
@@ -132,8 +127,7 @@ void PhysxArticulation::internalEnsureAddedToScene() {
   }
 }
 
-void PhysxArticulation::internalNotifyAddToScene(PhysxArticulationLinkComponent *link,
-                                                 Scene &scene) {
+void PhysxArticulation::internalNotifyAddToScene(PhysxArticulationLinkComponent *link, Scene &scene) {
   if (mScene && mScene != &scene) {
     throw std::runtime_error("links of the same articulation cannot be added to different scenes");
   }
@@ -144,8 +138,7 @@ void PhysxArticulation::internalNotifyAddToScene(PhysxArticulationLinkComponent 
   }
 }
 
-void PhysxArticulation::internalNotifyRemoveFromScene(PhysxArticulationLinkComponent *link,
-                                                      Scene &scene) {
+void PhysxArticulation::internalNotifyRemoveFromScene(PhysxArticulationLinkComponent *link, Scene &scene) {
   mLinksAddedToScene--;
   internalEnsureRemovedFromScene();
   if (mLinksAddedToScene == 0) {
@@ -168,6 +161,9 @@ void PhysxArticulation::internalAddPxArticulationToScene(Scene &scene) {
 
   system->getPxScene()->addArticulation(*mPxArticulation);
   mCache = mPxArticulation->createCache();
+  for (auto &link : mLinks) {
+    link->syncPoseToEntity();
+  }
 }
 
 void PhysxArticulation::internalEnsureRemovedFromScene() {
@@ -225,8 +221,7 @@ std::vector<std::shared_ptr<PhysxArticulationJoint>> PhysxArticulation::getActiv
 
 uint32_t PhysxArticulation::getDof() {
   if (!mPxArticulation->getScene()) {
-    throw std::runtime_error(
-        "articulation properties are only available when all links are added to scene");
+    throw std::runtime_error("articulation properties are only available when all links are added to scene");
   }
   return mPxArticulation->getDofs();
 }
@@ -247,9 +242,10 @@ Eigen::VectorXf PhysxArticulation::getQpos() {
       return true;
     }();
     (void)once;
+
 #ifdef SAPIEN_CUDA
     auto qpos = std::dynamic_pointer_cast<PhysxSystemGpu>(mScene->getPhysxSystem())
-                    ->gpuDownloadArticulationQpos(mPxArticulation->getGpuArticulationIndex());
+                    ->gpuDownloadArticulationQpos(getGpuDataIndex());
     return Eigen::Map<Eigen::VectorXf>(qpos.data(), dof);
 #else
     return Eigen::VectorXf();
@@ -296,7 +292,7 @@ void PhysxArticulation::setQpos(Eigen::VectorXf const &q) {
     (void)once;
 #ifdef SAPIEN_CUDA
     std::dynamic_pointer_cast<PhysxSystemGpu>(mScene->getPhysxSystem())
-        ->gpuUploadArticulationQpos(mPxArticulation->getGpuArticulationIndex(), q);
+        ->gpuUploadArticulationQpos(getGpuDataIndex(), q);
 #endif
     return;
   }
@@ -346,54 +342,82 @@ Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor> PhysxArticulation::getQ
   return m;
 }
 
-Eigen::Matrix<float, Eigen::Dynamic, 6, Eigen::RowMajor>
-PhysxArticulation::getLinkIncomingJointForces() {
+Eigen::Matrix<float, Eigen::Dynamic, 6, Eigen::RowMajor> PhysxArticulation::getLinkIncomingJointForces() {
   if (getRoot()->isUsingDirectGPUAPI()) {
     throw std::runtime_error("getting qf is not supported in GPU simulation.");
   }
-  mPxArticulation->copyInternalStateToCache(*mCache,
-                                            PxArticulationCacheFlag::eLINK_INCOMING_JOINT_FORCE);
+  mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCacheFlag::eLINK_INCOMING_JOINT_FORCE);
   auto mat8 = Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, 8, Eigen::RowMajor>>(
       reinterpret_cast<float *>(mCache->linkIncomingJointForce), mPxArticulation->getNbLinks(), 8);
   return mat8(Eigen::all, {0, 1, 2, 4, 5, 6});
 }
 
 Pose PhysxArticulation::getRootPose() {
-  // if (getRoot()->isUsingDirectGPUAPI()) {
-  //   throw std::runtime_error("getting root pose is not supported in GPU simulation.");
-  // }
+#ifdef SAPIEN_CUDA
+  if (mScene) {
+    auto system = std::dynamic_pointer_cast<PhysxSystemGpu>(mScene->getPhysxSystem());
+    if (system && system->isInitialized()) {
+      throw std::runtime_error("getting root pose is not supported after GPU initialization");
+    }
+  }
+#endif
   return PxTransformToPose(mPxArticulation->getRootGlobalPose());
 }
 Vec3 PhysxArticulation::getRootLinearVelocity() {
-  // if (getRoot()->isUsingDirectGPUAPI()) {
-  //   throw std::runtime_error("getting root velocity is not supported in GPU simulation.");
-  // }
+#ifdef SAPIEN_CUDA
+  if (mScene) {
+    auto system = std::dynamic_pointer_cast<PhysxSystemGpu>(mScene->getPhysxSystem());
+    if (system && system->isInitialized()) {
+      throw std::runtime_error("getting root linear velocity is not supported after GPU initialization");
+    }
+  }
+#endif
   return PxVec3ToVec3(mPxArticulation->getRootLinearVelocity());
 }
 Vec3 PhysxArticulation::getRootAngularVelocity() {
-  // if (getRoot()->isUsingDirectGPUAPI()) {
-  //   throw std::runtime_error("getting root velocity is not supported in GPU simulation.");
-  // }
+#ifdef SAPIEN_CUDA
+  if (mScene) {
+    auto system = std::dynamic_pointer_cast<PhysxSystemGpu>(mScene->getPhysxSystem());
+    if (system && system->isInitialized()) {
+      throw std::runtime_error("getting root angular velocity is not supported after GPU initialization");
+    }
+  }
+#endif
   return PxVec3ToVec3(mPxArticulation->getRootAngularVelocity());
 }
 
 void PhysxArticulation::setRootPose(Pose const &pose) {
-  // if (getRoot()->isUsingDirectGPUAPI()) {
-  //   throw std::runtime_error("setting root pose is not supported in GPU simulation.");
-  // }
+#ifdef SAPIEN_CUDA
+  if (mScene) {
+    auto system = std::dynamic_pointer_cast<PhysxSystemGpu>(mScene->getPhysxSystem());
+    if (system && system->isInitialized()) {
+      throw std::runtime_error("setting root pose is not supported after GPU initialization");
+    }
+  }
+#endif
   mPxArticulation->setRootGlobalPose(PoseToPxTransform(pose));
   syncPose();
 }
 void PhysxArticulation::setRootLinearVelocity(Vec3 const &v) {
-  // if (getRoot()->isUsingDirectGPUAPI()) {
-  //   throw std::runtime_error("setting root velocity is not supported in GPU simulation.");
-  // }
+#ifdef SAPIEN_CUDA
+  if (mScene) {
+    auto system = std::dynamic_pointer_cast<PhysxSystemGpu>(mScene->getPhysxSystem());
+    if (system && system->isInitialized()) {
+      throw std::runtime_error("setting root linear velocity is not supported after GPU initialization");
+    }
+  }
+#endif
   mPxArticulation->setRootLinearVelocity(Vec3ToPxVec3(v));
 }
 void PhysxArticulation::setRootAngularVelocity(Vec3 const &v) {
-  // if (getRoot()->isUsingDirectGPUAPI()) {
-  //   throw std::runtime_error("setting root angular is not supported in GPU simulation.");
-  // }
+#ifdef SAPIEN_CUDA
+  if (mScene) {
+    auto system = std::dynamic_pointer_cast<PhysxSystemGpu>(mScene->getPhysxSystem());
+    if (system && system->isInitialized()) {
+      throw std::runtime_error("setting root angular velocity is not supported after GPU initialization");
+    }
+  }
+#endif
   mPxArticulation->setRootAngularVelocity(Vec3ToPxVec3(v));
 }
 
@@ -407,33 +431,34 @@ Eigen::VectorXf PhysxArticulation::computePassiveForce(bool gravity, bool coriol
 
   if (coriolisAndCentrifugal) {
     mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCacheFlag::eVELOCITY);
-    mPxArticulation->computeCoriolisAndCentrifugalForce(*mCache);
-    f += Eigen::Map<Eigen::VectorXf>(mCache->jointForce, n);
+    // PhysX 5.11: computeCoriolisAndCentrifugalForce was renamed
+    // computeCoriolisCompensation and writes PxArticulationCache::coriolisForce.
+    mPxArticulation->computeCoriolisCompensation(*mCache);
+    f += Eigen::Map<Eigen::VectorXf>(mCache->coriolisForce, n);
   }
   if (gravity) {
-    mPxArticulation->computeGeneralizedGravityForce(*mCache);
-    f += Eigen::Map<Eigen::VectorXf>(mCache->jointForce, n);
+    // PhysX 5.11: computeGeneralizedGravityForce was renamed
+    // computeGravityCompensation and writes PxArticulationCache::gravityCompensationForce.
+    mPxArticulation->computeGravityCompensation(*mCache);
+    f += Eigen::Map<Eigen::VectorXf>(mCache->gravityCompensationForce, n);
   }
   return f;
 }
 
 void PhysxArticulation::createFixedTendon(
     std::vector<std::shared_ptr<PhysxArticulationLinkComponent>> const &chain,
-    std::vector<float> const &coefficients, std::vector<float> const &recipCoefficients,
-    float restLength, float offset, float stiffness, float damping, float low, float high,
-    float limitStiffness) {
+    std::vector<float> const &coefficients, std::vector<float> const &recipCoefficients, float restLength,
+    float offset, float stiffness, float damping, float low, float high, float limitStiffness) {
   for (auto &link : chain) {
     if (link->getArticulation().get() != this) {
-      throw std::runtime_error(
-          "failed to create tendon: the link does not belong to this articulation.");
+      throw std::runtime_error("failed to create tendon: the link does not belong to this articulation.");
     }
   }
   if (chain.size() == 0) {
     throw std::runtime_error("failed to create tendon: no links provided");
   }
   if (chain.size() != coefficients.size() || chain.size() != recipCoefficients.size()) {
-    throw std::runtime_error(
-        "failed to create tendon: link count does not match one coefficient count");
+    throw std::runtime_error("failed to create tendon: link count does not match one coefficient count");
   }
 
   std::map<PxArticulationLink *, PxArticulationTendonJoint *> l2t;
@@ -475,11 +500,9 @@ void PhysxArticulation::createFixedTendon(
 
     auto link = chain.at(i)->getPxActor();
     if (i == 0) {
-      l2t[link] = tendon->createTendonJoint(nullptr, axis, coefficients.at(i),
-                                            recipCoefficients.at(i), link);
+      l2t[link] = tendon->createTendonJoint(nullptr, axis, coefficients.at(i), recipCoefficients.at(i), link);
     } else {
-      auto parent = link->getInboundJoint() ? &link->getInboundJoint()->getParentArticulationLink()
-                                            : nullptr;
+      auto parent = link->getInboundJoint() ? &link->getInboundJoint()->getParentArticulationLink() : nullptr;
       if (!l2t.contains(parent)) {
         tendon->release();
         if (scene) {
@@ -494,13 +517,71 @@ void PhysxArticulation::createFixedTendon(
         }
         throw std::runtime_error("failed to create tendon: duplicated links");
       }
-      l2t[link] = tendon->createTendonJoint(l2t.at(parent), axis, coefficients.at(i),
-                                            recipCoefficients.at(i), link);
+      l2t[link] =
+          tendon->createTendonJoint(l2t.at(parent), axis, coefficients.at(i), recipCoefficients.at(i), link);
     }
   }
   if (scene) {
     scene->addArticulation(*mPxArticulation);
   }
+}
+
+std::shared_ptr<class PhysxArticulationSpatialTendon> PhysxArticulation::createSpatialTendon(
+    std::vector<std::shared_ptr<PhysxArticulationLinkComponent>> const &links,
+    std::vector<int> const &parents, std::vector<float> const &coefficients,
+    std::vector<Vec3> const &linkOffsets, std::vector<float> const &restLengths,
+    std::vector<std::tuple<float, float>> limits, float stiffness, float damping, float limitStiffness) {
+  PxScene *scene{};
+  if ((scene = mPxArticulation->getScene())) {
+    mPxArticulation->getScene()->removeArticulation(*mPxArticulation);
+  }
+  try {
+    auto tendon = std::make_shared<PhysxArticulationSpatialTendon>(shared_from_this(), links, parents,
+                                                                   coefficients, linkOffsets, restLengths,
+                                                                   limits, stiffness, damping, limitStiffness);
+    mSpatialTendons.push_back(tendon);
+    if (scene) {
+      scene->addArticulation(*mPxArticulation);
+    }
+    return tendon;
+  } catch (...) {
+    if (scene) {
+      scene->addArticulation(*mPxArticulation);
+    }
+    throw;
+  }
+}
+
+std::vector<std::shared_ptr<class PhysxArticulationSpatialTendon>>
+PhysxArticulation::getSpatialTendons() const {
+  return mSpatialTendons;
+}
+
+void PhysxArticulation::createMimicJoint(std::shared_ptr<PhysxArticulationJoint> thisJoint,
+                                         std::shared_ptr<PhysxArticulationJoint> otherJoint, float multiplier,
+                                         float offset) {
+  auto a = thisJoint->getPxJoint();
+  auto b = otherJoint->getPxJoint();
+  if (!a || !b) {
+    throw std::runtime_error("mimic joint is only supported for revolute and prismatic joints");
+  }
+  if ((a->getJointType() != PxArticulationJointType::ePRISMATIC &&
+       a->getJointType() != PxArticulationJointType::eREVOLUTE &&
+       a->getJointType() != PxArticulationJointType::eREVOLUTE_UNWRAPPED) ||
+      (b->getJointType() != PxArticulationJointType::ePRISMATIC &&
+       b->getJointType() != PxArticulationJointType::eREVOLUTE &&
+       b->getJointType() != PxArticulationJointType::eREVOLUTE_UNWRAPPED)) {
+    throw std::runtime_error("mimic joint is only supported for revolute and prismatic joints");
+  }
+
+  mPxArticulation->createMimicJoint(
+      *a,
+      a->getJointType() == PxArticulationJointType::ePRISMATIC ? PxArticulationAxis::eX
+                                                               : PxArticulationAxis::eTWIST,
+      *b,
+      b->getJointType() == PxArticulationJointType::ePRISMATIC ? PxArticulationAxis::eX
+                                                               : PxArticulationAxis::eTWIST,
+      -multiplier, -offset);
 }
 
 PhysxArticulation::~PhysxArticulation() {
@@ -513,8 +594,19 @@ PhysxArticulation::~PhysxArticulation() {
   mPxArticulation->release();
 }
 
-int PhysxArticulation::getGpuIndex() const {
-  return getPxArticulation()->getGpuArticulationIndex();
+int PhysxArticulation::getGpuIndex() const { return getPxArticulation()->getGPUIndex(); }
+
+int PhysxArticulation::getGpuDataIndex() const {
+#ifdef SAPIEN_CUDA
+  auto system = mScene ? std::dynamic_pointer_cast<PhysxSystemGpu>(mScene->getPhysxSystem()) : nullptr;
+  if (system) {
+    system->checkGpuInitialized();
+    int rigidCount = system->gpuGetRigidDynamicCudaHandle().shape[0];
+    int maxLinks = system->gpuGetArticulationLinkCudaHandle().shape[1];
+    return (getRoot()->getGpuPoseIndex() - rigidCount) / maxLinks;
+  }
+#endif
+  throw std::runtime_error("gpu_data_index requires an initialized GPU scene");
 }
 
 } // namespace physx

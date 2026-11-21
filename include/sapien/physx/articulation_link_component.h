@@ -76,13 +76,14 @@ public:
 
   Pose getGlobalPose() const;
 
+  ::physx::PxArticulationJointReducedCoordinate *getPxJoint() const;
+
 public:
   std::string getName() const { return mName; }
   void setName(std::string const &name) { mName = name; }
 
 private:
   std::string mName;
-  ::physx::PxArticulationJointReducedCoordinate *getPxJoint() const;
   std::vector<::physx::PxArticulationAxis::Enum> mAxes;
   std::weak_ptr<PhysxArticulationLinkComponent> mLink;
 };
@@ -130,7 +131,7 @@ public:
     }
   }
 
-  void internalSetGpuPoseIndex(int index) { mGpuPoseIndex = index; }
+  void internalSetGpuIndex(int index) { mGpuPoseIndex = index; }
 
   // index in all pose array
   int getGpuPoseIndex() const { return mGpuPoseIndex; }
@@ -149,8 +150,7 @@ private:
   std::shared_ptr<PhysxArticulation> mArticulation;
   ::physx::PxArticulationLink *mPxLink{};
 
-  std::shared_ptr<PhysxArticulationJoint>
-      mJoint; // cannot use unique_ptr for pybind11 compatibility
+  std::shared_ptr<PhysxArticulationJoint> mJoint; // cannot use unique_ptr for pybind11 compatibility
 
   int mGpuPoseIndex{-1};
 };

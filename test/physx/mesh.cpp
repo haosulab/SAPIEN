@@ -207,10 +207,11 @@ TEST(PhysxTriangleMesh, All) {
   auto [vs, ts] = Cube();
 
   {
-    auto mesh = std::make_shared<PhysxTriangleMesh>(vs, ts);
+    auto mesh = std::make_shared<PhysxTriangleMesh>(vs, ts, false);
 
     EXPECT_TRUE(mesh->getPxMesh());
     EXPECT_EQ(mesh->getPxMesh()->getReferenceCount(), 1);
+    EXPECT_FALSE(mesh->getSDFEnabled());
     EXPECT_FALSE(mesh->hasFilename());
     EXPECT_THROW(mesh->getFilename(), std::runtime_error);
 
@@ -231,10 +232,11 @@ TEST(PhysxTriangleMesh, All) {
   }
 
   {
-    auto mesh = std::make_shared<PhysxTriangleMesh>(vs, ts, "cube.obj");
+    auto mesh = std::make_shared<PhysxTriangleMesh>(vs, ts, "cube.obj", false);
 
     EXPECT_TRUE(mesh->getPxMesh());
     EXPECT_EQ(mesh->getPxMesh()->getReferenceCount(), 1);
+    EXPECT_FALSE(mesh->getSDFEnabled());
     EXPECT_TRUE(mesh->hasFilename());
     EXPECT_EQ(mesh->getFilename(), "cube.obj");
 
@@ -259,10 +261,11 @@ TEST(PhysxTriangleMesh, All) {
         std::filesystem::path(__FILE__).parent_path().parent_path() / "assets" / "cube.obj";
     ASSERT_TRUE(std::filesystem::is_regular_file(meshfile));
 
-    auto mesh = std::make_shared<PhysxTriangleMesh>(meshfile.string());
+    auto mesh = std::make_shared<PhysxTriangleMesh>(meshfile.string(), false);
 
     EXPECT_TRUE(mesh->getPxMesh());
     EXPECT_EQ(mesh->getPxMesh()->getReferenceCount(), 1);
+    EXPECT_FALSE(mesh->getSDFEnabled());
     EXPECT_TRUE(mesh->hasFilename());
     EXPECT_EQ(mesh->getFilename(), meshfile.string());
 

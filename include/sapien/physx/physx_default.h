@@ -21,7 +21,7 @@
 #include <string>
 
 namespace physx {
-struct PxgDynamicsMemoryConfig;
+struct PxGpuDynamicsMemoryConfig;
 };
 
 namespace sapien {
@@ -29,15 +29,14 @@ namespace physx {
 class PhysxMaterial;
 
 struct PhysxSceneConfig {
-  Vec3 gravity = {0, 0, -9.81};           // default gravity
-  float bounceThreshold = 2.f;            // relative velocity below this will not bounce
-  bool enablePCM = true;                  // Use persistent contact manifold solver for contact
-  bool enableTGS = true;                  // use TGS solver
-  bool enableCCD = false;                 // use continuous collision detection
-  bool enableEnhancedDeterminism = false; // improve determinism
-  bool enableFrictionEveryIteration =
-      true;                // better friction calculation, recommended for robotics
-  uint32_t cpuWorkers = 0; // CPU workers, 0 for using main thread
+  Vec3 gravity = {0, 0, -9.81};             // default gravity
+  float bounceThreshold = 2.f;              // relative velocity below this will not bounce
+  bool enablePCM = true;                    // Use persistent contact manifold solver for contact
+  bool enableTGS = true;                    // use TGS solver
+  bool enableCCD = false;                   // use continuous collision detection
+  bool enableEnhancedDeterminism = false;   // improve determinism
+  bool enableFrictionEveryIteration = true; // better friction calculation, recommended for robotics
+  uint32_t cpuWorkers = 0;                  // CPU workers, 0 for using main thread
 };
 
 struct PhysxBodyConfig {
@@ -63,11 +62,9 @@ public:
   static void SetDefaultMaterial(float staticFriction, float dynamicFriction, float restitution);
   static void setGpuMemoryConfig(uint32_t tempBufferCapacity, uint32_t maxRigidContactCount,
                                  uint32_t maxRigidPatchCount, uint32_t heapCapacity,
-                                 uint32_t foundLostPairsCapacity,
-                                 uint32_t foundLostAggregatePairsCapacity,
-                                 uint32_t totalAggregatePairsCapacity,
-                                 uint32_t collisionStackSize);
-  static ::physx::PxgDynamicsMemoryConfig const &getGpuMemoryConfig();
+                                 uint32_t foundLostPairsCapacity, uint32_t foundLostAggregatePairsCapacity,
+                                 uint32_t totalAggregatePairsCapacity, uint32_t collisionStackSize);
+  static ::physx::PxGpuDynamicsMemoryConfig const &getGpuMemoryConfig();
 
   static void setSceneConfig(Vec3 gravity, float bounceThreshold, bool enablePCM, bool enableTGS,
                              bool enableCCD, bool enableEnhancedDeterminism,
@@ -84,8 +81,7 @@ public:
   static void setShapeConfig(PhysxShapeConfig const &);
   static PhysxShapeConfig const &getShapeConfig();
 
-  static void setSDFShapeConfig(float spacing, uint32_t subgridSize,
-                                uint32_t numThreadsForConstruction);
+  static void setSDFShapeConfig(float spacing, uint32_t subgridSize, uint32_t numThreadsForConstruction);
   static void setSDFShapeConfig(PhysxSDFShapeConfig const &);
   static PhysxSDFShapeConfig getSDFShapeConfig();
 

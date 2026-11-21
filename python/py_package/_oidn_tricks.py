@@ -23,14 +23,14 @@ if platform.system() == "Linux":
         oidn_dll = ctypes.CDLL(
             os.path.join(
                 os.path.dirname(__file__),
-                "oidn_library/libOpenImageDenoise_core.so.2.0.1",
+                "oidn_library/libOpenImageDenoise_core.so.2.4.1",
             ),
             ctypes.RTLD_LOCAL,
         )
 
         oidn_dll = ctypes.CDLL(
             os.path.join(
-                os.path.dirname(__file__), "oidn_library/libOpenImageDenoise.so.2.0.1"
+                os.path.dirname(__file__), "oidn_library/libOpenImageDenoise.so.2.4.1"
             ),
             ctypes.RTLD_LOCAL,
         )

@@ -32,7 +32,7 @@ from .pysapien import set_log_level
 from .pysapien import math
 
 import platform
-if platform.system() != "Darwin":
+if platform.system() != "Darwin" and hasattr(pysapien, "simsense"):
     from .pysapien import simsense
 
 from . import physx

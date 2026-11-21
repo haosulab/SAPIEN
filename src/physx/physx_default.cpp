@@ -31,10 +31,9 @@ static PhysxBodyConfig gBodyConfig{};
 static PhysxShapeConfig gShapeConfig{};
 static PhysxSDFShapeConfig gSDFConfig{};
 
-static ::physx::PxgDynamicsMemoryConfig gGpuMemoryConfig{};
+static ::physx::PxGpuDynamicsMemoryConfig gGpuMemoryConfig{};
 
-void PhysxDefault::SetDefaultMaterial(float staticFriction, float dynamicFriction,
-                                      float restitution) {
+void PhysxDefault::SetDefaultMaterial(float staticFriction, float dynamicFriction, float restitution) {
   gDefaultMaterial.reset();
   gStaticFriction = staticFriction;
   gDynamicFriction = dynamicFriction;
@@ -46,8 +45,7 @@ std::shared_ptr<PhysxMaterial> PhysxDefault::GetDefaultMaterial() {
   if (m) {
     return m;
   }
-  gDefaultMaterial = m =
-      std::make_shared<PhysxMaterial>(gStaticFriction, gDynamicFriction, gRestitution);
+  gDefaultMaterial = m = std::make_shared<PhysxMaterial>(gStaticFriction, gDynamicFriction, gRestitution);
   return m;
 }
 
@@ -55,8 +53,7 @@ void PhysxDefault::setGpuMemoryConfig(uint32_t tempBufferCapacity, uint32_t maxR
                                       uint32_t maxRigidPatchCount, uint32_t heapCapacity,
                                       uint32_t foundLostPairsCapacity,
                                       uint32_t foundLostAggregatePairsCapacity,
-                                      uint32_t totalAggregatePairsCapacity,
-                                      uint32_t collisionStackSize) {
+                                      uint32_t totalAggregatePairsCapacity, uint32_t collisionStackSize) {
   gGpuMemoryConfig.tempBufferCapacity = tempBufferCapacity;
   gGpuMemoryConfig.maxRigidContactCount = maxRigidContactCount;
   gGpuMemoryConfig.maxRigidPatchCount = maxRigidPatchCount;
@@ -67,12 +64,10 @@ void PhysxDefault::setGpuMemoryConfig(uint32_t tempBufferCapacity, uint32_t maxR
   gGpuMemoryConfig.collisionStackSize = collisionStackSize;
 }
 
-::physx::PxgDynamicsMemoryConfig const &PhysxDefault::getGpuMemoryConfig() {
-  return gGpuMemoryConfig;
-}
+::physx::PxGpuDynamicsMemoryConfig const &PhysxDefault::getGpuMemoryConfig() { return gGpuMemoryConfig; }
 
-void PhysxDefault::setSceneConfig(Vec3 gravity, float bounceThreshold, bool enablePCM,
-                                  bool enableTGS, bool enableCCD, bool enableEnhancedDeterminism,
+void PhysxDefault::setSceneConfig(Vec3 gravity, float bounceThreshold, bool enablePCM, bool enableTGS,
+                                  bool enableCCD, bool enableEnhancedDeterminism,
                                   bool enableFrictionEveryIteration, uint32_t cpuWorkers) {
   gSceneConfig.gravity = gravity;
   gSceneConfig.bounceThreshold = bounceThreshold;
@@ -104,8 +99,7 @@ PhysxShapeConfig const &PhysxDefault::getShapeConfig() { return gShapeConfig; }
 
 void PhysxDefault::EnableGPU() {
   if (PhysxEngine::GetIfExists()) {
-    throw std::runtime_error(
-        "GPU PhysX can only be enabled once before any other code involving PhysX");
+    throw std::runtime_error("GPU PhysX can only be enabled once before any other code involving PhysX");
   }
   gGPUEnabled = true;
 }

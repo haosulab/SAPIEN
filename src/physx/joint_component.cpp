@@ -26,21 +26,18 @@ using namespace physx;
 namespace sapien {
 namespace physx {
 
-PhysxJointComponent::PhysxJointComponent(std::shared_ptr<PhysxRigidBodyComponent> body)
-    : mChild(body) {}
+PhysxJointComponent::PhysxJointComponent(std::shared_ptr<PhysxRigidBodyComponent> body) : mChild(body) {}
 
 PhysxJointComponent::~PhysxJointComponent() {}
 
 void PhysxJointComponent::setParent(std::shared_ptr<PhysxRigidBaseComponent> body) {
   if (mParent) {
-    mParent->internalUnregisterJoint(
-        std::static_pointer_cast<PhysxJointComponent>(shared_from_this()));
+    mParent->internalUnregisterJoint(std::static_pointer_cast<PhysxJointComponent>(shared_from_this()));
   }
   mParent = body;
   internalRefresh();
   if (mParent) {
-    mParent->internalRegisterJoint(
-        std::static_pointer_cast<PhysxJointComponent>(shared_from_this()));
+    mParent->internalRegisterJoint(std::static_pointer_cast<PhysxJointComponent>(shared_from_this()));
   }
 }
 
@@ -106,18 +103,18 @@ PhysxDriveComponent::PhysxDriveComponent(std::shared_ptr<PhysxRigidBodyComponent
   if (!body) {
     throw std::runtime_error("physx drive must be initialized with a valid rigid body");
   }
-  mJoint = PxD6JointCreate(*mEngine->getPxPhysics(), nullptr, PxTransform(PxIdentity),
-                           body->getPxActor(), PxTransform(PxIdentity));
+  mJoint = PxD6JointCreate(*mEngine->getPxPhysics(), nullptr, PxTransform(PxIdentity), body->getPxActor(),
+                           PxTransform(PxIdentity));
 
-  for (auto axis : {PxD6Axis::eX, PxD6Axis::eY, PxD6Axis::eZ, PxD6Axis::eTWIST, PxD6Axis::eSWING1,
-                    PxD6Axis::eSWING2}) {
+  for (auto axis :
+       {PxD6Axis::eX, PxD6Axis::eY, PxD6Axis::eZ, PxD6Axis::eTWIST, PxD6Axis::eSWING1, PxD6Axis::eSWING2}) {
     mJoint->setMotion(axis, PxD6Motion::eFREE);
   }
   mJoint->setConstraintFlag(PxConstraintFlag::eDISABLE_CONSTRAINT, true);
 }
 
-void PhysxDriveComponent::setLinearLimit(PxD6Axis::Enum axis, float low, float high,
-                                         float stiffness, float damping) {
+void PhysxDriveComponent::setLinearLimit(PxD6Axis::Enum axis, float low, float high, float stiffness,
+                                         float damping) {
   if (low < 0 && std::isinf(low) && high > 0 && std::isinf(high)) {
     mJoint->setMotion(axis, PxD6Motion::eFREE);
     return;
@@ -128,8 +125,24 @@ void PhysxDriveComponent::setLinearLimit(PxD6Axis::Enum axis, float low, float h
     return;
   }
 
+  if (std::isinf(low) || std::isinf(high) || low > high) {
+    throw std::runtime_error("Linear limit must be non-negative finite numbers. Or set range to (-infinity, "
+                       "+infinity) to remove the limit.");
+  }
+
   mJoint->setMotion(axis, PxD6Motion::eLIMITED);
   mJoint->setLinearLimit(axis, {low, high, {stiffness, damping}});
+}
+
+std::tuple<float, float, float, float> PhysxDriveComponent::getLinearLimit(PxD6Axis::Enum axis) const {
+  if (mJoint->getMotion(axis) == PxD6Motion::eFREE) {
+    return {-std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(), 0.f, 0.f};
+  }
+  if (mJoint->getMotion(axis) == PxD6Motion::eLOCKED) {
+    return {0.f, 0.f, 0.f, 0.f};
+  }
+  auto limit = mJoint->getLinearLimit(axis);
+  return {limit.lower, limit.upper, limit.stiffness, limit.damping};
 }
 
 void PhysxDriveComponent::setXLimit(float low, float high, float stiffness, float damping) {
@@ -141,48 +154,135 @@ void PhysxDriveComponent::setYLimit(float low, float high, float stiffness, floa
 void PhysxDriveComponent::setZLimit(float low, float high, float stiffness, float damping) {
   setLinearLimit(PxD6Axis::eZ, low, high, stiffness, damping);
 }
-void PhysxDriveComponent::setYZConeLimit(float yAngle, float zAngle, float stiffness,
-                                         float damping) {
+void PhysxDriveComponent::setYZConeLimit(float yAngle, float zAngle, float stiffness, float damping) {
+  if (yAngle == 0.f && zAngle == 0.f && stiffness == 0.f && damping == 0.f) {
+    mJoint->setMotion(PxD6Axis::eSWING1, PxD6Motion::eLOCKED);
+    mJoint->setMotion(PxD6Axis::eSWING2, PxD6Motion::eLOCKED);
+    return;
+  }
+
+  if (std::isinf(yAngle) && std::isinf(zAngle)) {
+    mJoint->setMotion(PxD6Axis::eSWING1, PxD6Motion::eFREE);
+    mJoint->setMotion(PxD6Axis::eSWING2, PxD6Motion::eFREE);
+    return;
+  }
+
+  if (std::isinf(yAngle) || std::isinf(zAngle) || yAngle < 0 || zAngle < 0) {
+    throw std::runtime_error("Cone limit angles must be non-negative finite numbers. Or set both angles to "
+                       "infinity to remove the limit.");
+  }
+
+  mJoint->setMotion(PxD6Axis::eSWING1, PxD6Motion::eLIMITED);
+  mJoint->setMotion(PxD6Axis::eSWING2, PxD6Motion::eLIMITED);
   mJoint->setSwingLimit({yAngle, zAngle, {stiffness, damping}});
 }
-void PhysxDriveComponent::setYZPyramidLimit(float yLow, float yHigh, float zLow, float zHigh,
-                                            float stiffness, float damping) {
+
+void PhysxDriveComponent::setYZPyramidLimit(float yLow, float yHigh, float zLow, float zHigh, float stiffness,
+                                            float damping) {
+  if (yLow < 0 && std::isinf(yLow) && yHigh > 0 && std::isinf(yHigh) && zLow < 0 && std::isinf(zLow) &&
+      zHigh > 0 && std::isinf(zHigh) && stiffness == 0.f && damping == 0.f) {
+    mJoint->setMotion(PxD6Axis::eSWING1, PxD6Motion::eFREE);
+    mJoint->setMotion(PxD6Axis::eSWING2, PxD6Motion::eFREE);
+    return;
+  }
+
+  if (yLow == 0.f && yHigh == 0.f && zLow == 0.f && zHigh == 0.f && stiffness == 0.f && damping == 0.f) {
+    mJoint->setMotion(PxD6Axis::eSWING1, PxD6Motion::eLOCKED);
+    mJoint->setMotion(PxD6Axis::eSWING2, PxD6Motion::eLOCKED);
+    return;
+  }
+
+  if (std::isinf(yLow) || std::isinf(yHigh) || std::isinf(zLow) || std::isinf(zHigh) || yLow > yHigh ||
+      zLow > zHigh) {
+    throw std::runtime_error("Pyramid limit must be 2 finite ranges. Or set both ranges to (-infinity, infinity) "
+                       "to remove the limit.");
+  }
+
+  mJoint->setMotion(PxD6Axis::eSWING1, PxD6Motion::eLIMITED);
+  mJoint->setMotion(PxD6Axis::eSWING2, PxD6Motion::eLIMITED);
   mJoint->setPyramidSwingLimit({yLow, yHigh, zLow, zHigh, {stiffness, damping}});
 }
 void PhysxDriveComponent::setXTwistLimit(float low, float high, float stiffness, float damping) {
+  if (low < 0 && std::isinf(low) && high > 0 && std::isinf(high)) {
+    mJoint->setMotion(PxD6Axis::eTWIST, PxD6Motion::eFREE);
+    return;
+  }
+
+  if (low == 0.f && high == 0.f && stiffness == 0.f && damping == 0.f) {
+    mJoint->setMotion(PxD6Axis::eTWIST, PxD6Motion::eLOCKED);
+    return;
+  }
+
+  if (std::isinf(low) || std::isinf(high) || low > high) {
+    throw std::runtime_error("Twist limit must be non-negative finite numbers. Or set range to (-infinity, "
+                       "+infinity) to remove the limit.");
+  }
+
   mJoint->setMotion(PxD6Axis::eTWIST, PxD6Motion::eLIMITED);
   mJoint->setTwistLimit({low, high, {stiffness, damping}});
 }
 
 std::tuple<float, float, float, float> PhysxDriveComponent::getXLimit() const {
-  auto l = mJoint->getLinearLimit(PxD6Axis::eX);
-  return {l.lower, l.upper, l.stiffness, l.damping};
+  return getLinearLimit(PxD6Axis::eX);
 }
 std::tuple<float, float, float, float> PhysxDriveComponent::getYLimit() const {
-  auto l = mJoint->getLinearLimit(PxD6Axis::eY);
-  return {l.lower, l.upper, l.stiffness, l.damping};
+  return getLinearLimit(PxD6Axis::eY);
 }
 std::tuple<float, float, float, float> PhysxDriveComponent::getZLimit() const {
-  auto l = mJoint->getLinearLimit(PxD6Axis::eZ);
-  return {l.lower, l.upper, l.stiffness, l.damping};
+  return getLinearLimit(PxD6Axis::eZ);
 }
 
 std::tuple<float, float, float, float> PhysxDriveComponent::getXTwistLimit() const {
+  if (mJoint->getMotion(PxD6Axis::eTWIST) == PxD6Motion::eFREE) {
+    return {-std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(), 0.f, 0.f};
+  }
+  if (mJoint->getMotion(PxD6Axis::eTWIST) == PxD6Motion::eLOCKED) {
+    return {0.f, 0.f, 0.f, 0.f};
+  }
   auto l = mJoint->getTwistLimit();
   return {l.lower, l.upper, l.stiffness, l.damping};
 }
+
 std::tuple<float, float, float, float> PhysxDriveComponent::getYZConeLimit() const {
+  if (mJoint->getMotion(PxD6Axis::eSWING1) == PxD6Motion::eLOCKED &&
+      mJoint->getMotion(PxD6Axis::eSWING2) == PxD6Motion::eLOCKED) {
+    return {0.f, 0.f, 0.f, 0.f};
+  }
+  if (mJoint->getMotion(PxD6Axis::eSWING1) == PxD6Motion::eFREE &&
+      mJoint->getMotion(PxD6Axis::eSWING2) == PxD6Motion::eFREE) {
+    return {std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(), 0.f, 0.f};
+  }
   auto l = mJoint->getSwingLimit();
   return {l.yAngle, l.zAngle, l.stiffness, l.damping};
 }
-std::tuple<float, float, float, float, float, float>
-PhysxDriveComponent::getZPyramidLimit() const {
+
+std::tuple<float, float, float, float, float, float> PhysxDriveComponent::getZPyramidLimit() const {
+  if (mJoint->getMotion(PxD6Axis::eSWING1) == PxD6Motion::eLOCKED &&
+      mJoint->getMotion(PxD6Axis::eSWING2) == PxD6Motion::eLOCKED) {
+    return {0.f, 0.f, 0.f, 0.f, 0.f, 0.f};
+  }
+  if (mJoint->getMotion(PxD6Axis::eSWING1) == PxD6Motion::eFREE &&
+      mJoint->getMotion(PxD6Axis::eSWING2) == PxD6Motion::eFREE) {
+    return {-std::numeric_limits<float>::infinity(),
+            std::numeric_limits<float>::infinity(),
+            -std::numeric_limits<float>::infinity(),
+            std::numeric_limits<float>::infinity(),
+            0.f,
+            0.f};
+  }
   auto l = mJoint->getPyramidSwingLimit();
   return {l.yAngleMin, l.yAngleMax, l.zAngleMin, l.zAngleMax, l.stiffness, l.damping};
 }
 
-void PhysxDriveComponent::setDrive(PxD6Drive::Enum drive, float stiffness, float damping,
-                                   float forceLimit, DriveMode mode) {
+void PhysxDriveComponent::setDrive(PxD6Drive::Enum drive, float stiffness, float damping, float forceLimit,
+                                   DriveMode mode) {
+  // PhysX 5.11 requires an explicit angular drive configuration before
+  // setting twist/swing/slerp drives.
+  if (drive == PxD6Drive::eSLERP) {
+    mJoint->setAngularDriveConfig(PxD6AngularDriveConfig::eSLERP);
+  } else if (drive == PxD6Drive::eTWIST || drive == PxD6Drive::eSWING1 || drive == PxD6Drive::eSWING2) {
+    mJoint->setAngularDriveConfig(PxD6AngularDriveConfig::eSWING_TWIST);
+  }
   mJoint->setDrive(drive, {stiffness, damping, forceLimit, mode == DriveMode::eACCELERATION});
 }
 void PhysxDriveComponent::setXDriveProperties(float stiffness, float damping, float forceLimit,
@@ -197,13 +297,16 @@ void PhysxDriveComponent::setZDriveProperties(float stiffness, float damping, fl
                                               DriveMode mode) {
   setDrive(PxD6Drive::eZ, stiffness, damping, forceLimit, mode);
 }
-void PhysxDriveComponent::setXTwistDriveProperties(float stiffness, float damping,
-                                                   float forceLimit, DriveMode mode) {
+void PhysxDriveComponent::setXTwistDriveProperties(float stiffness, float damping, float forceLimit,
+                                                   DriveMode mode) {
   setDrive(PxD6Drive::eTWIST, stiffness, damping, forceLimit, mode);
 }
-void PhysxDriveComponent::setYZSwingDriveProperties(float stiffness, float damping,
-                                                    float forceLimit, DriveMode mode) {
-  setDrive(PxD6Drive::eSWING, stiffness, damping, forceLimit, mode);
+void PhysxDriveComponent::setYZSwingDriveProperties(float stiffness, float damping, float forceLimit,
+                                                    DriveMode mode) {
+  // PhysX 5.11 split the swing drive into per-axis eSWING1/eSWING2 drives;
+  // the old eSWING drive applied the same parameters to both swing axes.
+  setDrive(PxD6Drive::eSWING1, stiffness, damping, forceLimit, mode);
+  setDrive(PxD6Drive::eSWING2, stiffness, damping, forceLimit, mode);
 }
 void PhysxDriveComponent::setSlerpDriveProperties(float stiffness, float damping, float forceLimit,
                                                   DriveMode mode) {
@@ -214,51 +317,43 @@ std::tuple<float, float, float, PhysxDriveComponent::DriveMode>
 PhysxDriveComponent::getXDriveProperties() const {
   auto d = mJoint->getDrive(PxD6Drive::eX);
   return {d.stiffness, d.damping, d.forceLimit,
-          d.flags.isSet(PxD6JointDriveFlag::eACCELERATION) ? DriveMode::eACCELERATION
-                                                           : DriveMode::eFORCE};
+          d.flags.isSet(PxD6JointDriveFlag::eACCELERATION) ? DriveMode::eACCELERATION : DriveMode::eFORCE};
 }
 std::tuple<float, float, float, PhysxDriveComponent::DriveMode>
 PhysxDriveComponent::getYDriveProperties() const {
   auto d = mJoint->getDrive(PxD6Drive::eY);
   return {d.stiffness, d.damping, d.forceLimit,
-          d.flags.isSet(PxD6JointDriveFlag::eACCELERATION) ? DriveMode::eACCELERATION
-                                                           : DriveMode::eFORCE};
+          d.flags.isSet(PxD6JointDriveFlag::eACCELERATION) ? DriveMode::eACCELERATION : DriveMode::eFORCE};
 }
 std::tuple<float, float, float, PhysxDriveComponent::DriveMode>
 PhysxDriveComponent::getZDriveProperties() const {
   auto d = mJoint->getDrive(PxD6Drive::eZ);
   return {d.stiffness, d.damping, d.forceLimit,
-          d.flags.isSet(PxD6JointDriveFlag::eACCELERATION) ? DriveMode::eACCELERATION
-                                                           : DriveMode::eFORCE};
+          d.flags.isSet(PxD6JointDriveFlag::eACCELERATION) ? DriveMode::eACCELERATION : DriveMode::eFORCE};
 }
 std::tuple<float, float, float, PhysxDriveComponent::DriveMode>
 PhysxDriveComponent::getXTwistDriveProperties() const {
   auto d = mJoint->getDrive(PxD6Drive::eTWIST);
   return {d.stiffness, d.damping, d.forceLimit,
-          d.flags.isSet(PxD6JointDriveFlag::eACCELERATION) ? DriveMode::eACCELERATION
-                                                           : DriveMode::eFORCE};
+          d.flags.isSet(PxD6JointDriveFlag::eACCELERATION) ? DriveMode::eACCELERATION : DriveMode::eFORCE};
 }
 std::tuple<float, float, float, PhysxDriveComponent::DriveMode>
 PhysxDriveComponent::getYZSwingDriveProperties() const {
-  auto d = mJoint->getDrive(PxD6Drive::eSWING);
+  auto d = mJoint->getDrive(PxD6Drive::eSWING1);
   return {d.stiffness, d.damping, d.forceLimit,
-          d.flags.isSet(PxD6JointDriveFlag::eACCELERATION) ? DriveMode::eACCELERATION
-                                                           : DriveMode::eFORCE};
+          d.flags.isSet(PxD6JointDriveFlag::eACCELERATION) ? DriveMode::eACCELERATION : DriveMode::eFORCE};
 }
 std::tuple<float, float, float, PhysxDriveComponent::DriveMode>
 PhysxDriveComponent::getSlerpDriveProperties() const {
   auto d = mJoint->getDrive(PxD6Drive::eSLERP);
   return {d.stiffness, d.damping, d.forceLimit,
-          d.flags.isSet(PxD6JointDriveFlag::eACCELERATION) ? DriveMode::eACCELERATION
-                                                           : DriveMode::eFORCE};
+          d.flags.isSet(PxD6JointDriveFlag::eACCELERATION) ? DriveMode::eACCELERATION : DriveMode::eFORCE};
 }
 
 void PhysxDriveComponent::setDriveTarget(Pose const &pose) {
   mJoint->setDrivePosition(PoseToPxTransform(pose));
 }
-Pose PhysxDriveComponent::getDriveTarget() const {
-  return PxTransformToPose(mJoint->getDrivePosition());
-}
+Pose PhysxDriveComponent::getDriveTarget() const { return PxTransformToPose(mJoint->getDrivePosition()); }
 
 void PhysxDriveComponent::setDriveTargetVelocity(Vec3 const &linear, Vec3 const &angular) {
   mJoint->setDriveVelocity(Vec3ToPxVec3(linear), Vec3ToPxVec3(angular));
@@ -290,8 +385,8 @@ PhysxGearComponent::PhysxGearComponent(std::shared_ptr<PhysxRigidBodyComponent> 
   if (!body) {
     throw std::runtime_error("physx gear must be initialized with a valid rigid body");
   }
-  mJoint = PxGearJointCreate(*mEngine->getPxPhysics(), nullptr, PxTransform(PxIdentity),
-                             body->getPxActor(), PxTransform(PxIdentity));
+  mJoint = PxGearJointCreate(*mEngine->getPxPhysics(), nullptr, PxTransform(PxIdentity), body->getPxActor(),
+                             PxTransform(PxIdentity));
   mJoint->setGearRatio(1.f);
   mJoint->setConstraintFlag(PxConstraintFlag::eDISABLE_CONSTRAINT, true);
 }
@@ -347,8 +442,7 @@ PhysxDistanceJointComponent::Create(std::shared_ptr<PhysxRigidBodyComponent> bod
   return distanceJoint;
 }
 
-PhysxDistanceJointComponent::PhysxDistanceJointComponent(
-    std::shared_ptr<PhysxRigidBodyComponent> body)
+PhysxDistanceJointComponent::PhysxDistanceJointComponent(std::shared_ptr<PhysxRigidBodyComponent> body)
     : PhysxJointComponent(body) {
   if (!body) {
     throw std::runtime_error("physx distanceJoint must be initialized with a valid rigid body");

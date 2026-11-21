@@ -10,7 +10,7 @@ TEST(SapienRenderTexture, CreateFromFile) {
                   "assets" / "test_texture.png";
   auto texture = std::make_shared<SapienRenderTexture2D>(
       meshfile.string(), 3, SapienRenderTexture2D::FilterMode::eNEAREST,
-      SapienRenderTexture2D::AddressMode::eMIRROR);
+      SapienRenderTexture2D::AddressMode::eMIRROR, false);
   ASSERT_TRUE(texture->getTexture());
   EXPECT_EQ(texture->getMipmapLevels(), 3);
   EXPECT_EQ(texture->getWidth(), 64);

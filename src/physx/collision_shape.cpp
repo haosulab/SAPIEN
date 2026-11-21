@@ -45,17 +45,13 @@ std::array<uint32_t, 4> PhysxCollisionShape::getCollisionGroups() const {
 void PhysxCollisionShape::setRestOffset(float offset) { getPxShape()->setRestOffset(offset); }
 float PhysxCollisionShape::getRestOffset() const { return getPxShape()->getRestOffset(); }
 
-void PhysxCollisionShape::setContactOffset(float offset) {
-  getPxShape()->setContactOffset(offset);
-}
+void PhysxCollisionShape::setContactOffset(float offset) { getPxShape()->setContactOffset(offset); }
 float PhysxCollisionShape::getContactOffset() const { return getPxShape()->getContactOffset(); }
 
 void PhysxCollisionShape::setTorsionalPatchRadius(float radius) {
   getPxShape()->setTorsionalPatchRadius(radius);
 }
-float PhysxCollisionShape::getTorsionalPatchRadius() const {
-  return getPxShape()->getTorsionalPatchRadius();
-}
+float PhysxCollisionShape::getTorsionalPatchRadius() const { return getPxShape()->getTorsionalPatchRadius(); }
 
 void PhysxCollisionShape::setMinTorsionalPatchRadius(float radius) {
   getPxShape()->setMinTorsionalPatchRadius(radius);
@@ -67,14 +63,11 @@ float PhysxCollisionShape::getMinTorsionalPatchRadius() const {
 void PhysxCollisionShape::setLocalPose(Pose const &pose) {
   getPxShape()->setLocalPose(PoseToPxTransform(pose));
   if (mPxShape->getActor()) {
-    throw std::runtime_error(
-        "failed to set shape local pose: this function should only be used befor "
-        "the shape is attached to a rigid-body-type component");
+    throw std::runtime_error("failed to set shape local pose: this function should only be used before "
+                             "the shape is attached to a rigid-body-type component");
   }
 }
-Pose PhysxCollisionShape::getLocalPose() const {
-  return PxTransformToPose(getPxShape()->getLocalPose());
-}
+Pose PhysxCollisionShape::getLocalPose() const { return PxTransformToPose(getPxShape()->getLocalPose()); }
 
 void PhysxCollisionShape::setIsTrigger(bool trigger) {
   if (trigger) {
@@ -85,9 +78,7 @@ void PhysxCollisionShape::setIsTrigger(bool trigger) {
     mPxShape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, true);
   }
 }
-bool PhysxCollisionShape::isTrigger() const {
-  return mPxShape->getFlags() & PxShapeFlag::eTRIGGER_SHAPE;
-}
+bool PhysxCollisionShape::isTrigger() const { return mPxShape->getFlags() & PxShapeFlag::eTRIGGER_SHAPE; }
 
 void PhysxCollisionShape::setIsSceneQuery(bool query) {
   mPxShape->setFlag(PxShapeFlag::eSCENE_QUERY_SHAPE, query);
@@ -104,9 +95,7 @@ void PhysxCollisionShape::setPhysicalMaterial(std::shared_ptr<PhysxMaterial> mat
   mPxShape->setMaterials(&mat, 1);
   mPhysicalMaterial = material;
 }
-std::shared_ptr<PhysxMaterial> PhysxCollisionShape::getPhysicalMaterial() const {
-  return mPhysicalMaterial;
-}
+std::shared_ptr<PhysxMaterial> PhysxCollisionShape::getPhysicalMaterial() const { return mPhysicalMaterial; }
 
 void PhysxCollisionShape::setDefaultProperties() {
   mPxShape->userData = this;
@@ -141,13 +130,12 @@ void PhysxCollisionShape::copyProperties(PhysxCollisionShape &target) const {
 PhysxCollisionShapePlane::PhysxCollisionShapePlane(std::shared_ptr<PhysxMaterial> material) {
   mEngine = PhysxEngine::Get();
   mPhysicalMaterial = material ? material : PhysxDefault::GetDefaultMaterial();
-  mPxShape = mEngine->getPxPhysics()->createShape(PxPlaneGeometry(),
-                                                  *getPhysicalMaterial()->getPxMaterial(), true);
+  mPxShape =
+      mEngine->getPxPhysics()->createShape(PxPlaneGeometry(), *getPhysicalMaterial()->getPxMaterial(), true);
   setDefaultProperties();
 }
 
-PhysxCollisionShapeBox::PhysxCollisionShapeBox(Vec3 halfLengths,
-                                               std::shared_ptr<PhysxMaterial> material) {
+PhysxCollisionShapeBox::PhysxCollisionShapeBox(Vec3 halfLengths, std::shared_ptr<PhysxMaterial> material) {
   mEngine = PhysxEngine::Get();
   mPhysicalMaterial = material ? material : PhysxDefault::GetDefaultMaterial();
   mPxShape = mEngine->getPxPhysics()->createShape(PxBoxGeometry(Vec3ToPxVec3(halfLengths)),
@@ -180,8 +168,7 @@ PhysxCollisionShapeCylinder::PhysxCollisionShapeCylinder(float radius, float hal
   setDefaultProperties();
 }
 
-PhysxCollisionShapeSphere::PhysxCollisionShapeSphere(float radius,
-                                                     std::shared_ptr<PhysxMaterial> material) {
+PhysxCollisionShapeSphere::PhysxCollisionShapeSphere(float radius, std::shared_ptr<PhysxMaterial> material) {
   mEngine = PhysxEngine::Get();
   mPhysicalMaterial = material ? material : PhysxDefault::GetDefaultMaterial();
   mPxShape = mEngine->getPxPhysics()->createShape(PxSphereGeometry(radius),
@@ -189,9 +176,9 @@ PhysxCollisionShapeSphere::PhysxCollisionShapeSphere(float radius,
   setDefaultProperties();
 }
 
-PhysxCollisionShapeConvexMesh::PhysxCollisionShapeConvexMesh(
-    std::shared_ptr<PhysxConvexMesh> mesh, Vec3 const &scale,
-    std::shared_ptr<PhysxMaterial> material) {
+PhysxCollisionShapeConvexMesh::PhysxCollisionShapeConvexMesh(std::shared_ptr<PhysxConvexMesh> mesh,
+                                                             Vec3 const &scale,
+                                                             std::shared_ptr<PhysxMaterial> material) {
   mEngine = PhysxEngine::Get();
   mPhysicalMaterial = material ? material : PhysxDefault::GetDefaultMaterial();
   mMesh = mesh;
@@ -205,8 +192,8 @@ PhysxCollisionShapeConvexMesh::PhysxCollisionShapeConvexMesh(
   mLocalAABB = {aabb.lower * scale, aabb.upper * scale};
 }
 
-PhysxCollisionShapeConvexMesh::PhysxCollisionShapeConvexMesh(
-    std::string const &filename, Vec3 const &scale, std::shared_ptr<PhysxMaterial> material) {
+PhysxCollisionShapeConvexMesh::PhysxCollisionShapeConvexMesh(std::string const &filename, Vec3 const &scale,
+                                                             std::shared_ptr<PhysxMaterial> material) {
   mEngine = PhysxEngine::Get();
   mPhysicalMaterial = material ? material : PhysxDefault::GetDefaultMaterial();
   mMesh = MeshManager::Get()->loadConvexMesh(filename);
@@ -246,9 +233,10 @@ PhysxCollisionShapeConvexMesh::LoadMultiple(std::string const &filename, Vec3 sc
   return result;
 }
 
-PhysxCollisionShapeTriangleMesh::PhysxCollisionShapeTriangleMesh(
-    std::string const &filename, Vec3 const &scale, std::shared_ptr<PhysxMaterial> material,
-    bool sdf) {
+PhysxCollisionShapeTriangleMesh::PhysxCollisionShapeTriangleMesh(std::string const &filename,
+                                                                 Vec3 const &scale,
+                                                                 std::shared_ptr<PhysxMaterial> material,
+                                                                 bool sdf) {
   mEngine = PhysxEngine::Get();
   mPhysicalMaterial = material ? material : PhysxDefault::GetDefaultMaterial();
 
@@ -268,8 +256,8 @@ PhysxCollisionShapeTriangleMesh::PhysxCollisionShapeTriangleMesh(
 
 PhysxCollisionShapeTriangleMesh::PhysxCollisionShapeTriangleMesh(
     Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> const &vertices,
-    Eigen::Matrix<uint32_t, Eigen::Dynamic, 3, Eigen::RowMajor> const &triangles,
-    Vec3 const &scale, std::shared_ptr<PhysxMaterial> material, bool sdf) {
+    Eigen::Matrix<uint32_t, Eigen::Dynamic, 3, Eigen::RowMajor> const &triangles, Vec3 const &scale,
+    std::shared_ptr<PhysxMaterial> material, bool sdf) {
   mEngine = PhysxEngine::Get();
   mPhysicalMaterial = material ? material : PhysxDefault::GetDefaultMaterial();
   mMesh = std::make_shared<PhysxTriangleMesh>(vertices, triangles, sdf);
@@ -283,9 +271,9 @@ PhysxCollisionShapeTriangleMesh::PhysxCollisionShapeTriangleMesh(
 }
 
 // internal use only
-PhysxCollisionShapeTriangleMesh::PhysxCollisionShapeTriangleMesh(
-    std::shared_ptr<PhysxTriangleMesh> mesh, Vec3 const &scale,
-    std::shared_ptr<PhysxMaterial> material) {
+PhysxCollisionShapeTriangleMesh::PhysxCollisionShapeTriangleMesh(std::shared_ptr<PhysxTriangleMesh> mesh,
+                                                                 Vec3 const &scale,
+                                                                 std::shared_ptr<PhysxMaterial> material) {
   mEngine = PhysxEngine::Get();
   mPhysicalMaterial = material ? material : PhysxDefault::GetDefaultMaterial();
   mMesh = mesh;
@@ -337,8 +325,16 @@ Vec3 PhysxCollisionShapeConvexMesh::getScale() const {
   return PxVec3ToVec3(static_cast<PxConvexMeshGeometry const &>(g).scale.scale);
 }
 
-Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor>
-PhysxCollisionShapeConvexMesh::getVertices() const {
+void PhysxCollisionShapeConvexMesh::setScale(Vec3 scale) {
+  auto &g = mPxShape->getGeometry();
+  assert(g.getType() == PxGeometryType::eCONVEXMESH);
+  mPxShape->setGeometry(PxConvexMeshGeometry((static_cast<PxConvexMeshGeometry const &>(g)).convexMesh,
+                                             PxMeshScale(Vec3ToPxVec3(scale), PxQuat(PxIdentity))));
+  auto aabb = mMesh->getAABB();
+  mLocalAABB = {aabb.lower * scale, aabb.upper * scale};
+}
+
+Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> PhysxCollisionShapeConvexMesh::getVertices() const {
   auto &g_ = mPxShape->getGeometry();
   assert(g_.getType() == PxGeometryType::eCONVEXMESH);
   auto &g = static_cast<PxConvexMeshGeometry const &>(g_);
@@ -351,8 +347,8 @@ PhysxCollisionShapeConvexMesh::getVertices() const {
     vertices.push_back(gv[i].y);
     vertices.push_back(gv[i].z);
   }
-  return Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor>>(
-      vertices.data(), vertices.size() / 3, 3);
+  return Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor>>(vertices.data(),
+                                                                              vertices.size() / 3, 3);
 }
 
 Eigen::Matrix<uint32_t, Eigen::Dynamic, 3, Eigen::RowMajor>
@@ -372,14 +368,23 @@ PhysxCollisionShapeConvexMesh::getTriangles() const {
       indices.push_back(gi[polygon.mIndexBase + j + 2]);
     }
   }
-  return Eigen::Map<Eigen::Matrix<uint32_t, Eigen::Dynamic, 3, Eigen::RowMajor>>(
-      indices.data(), indices.size() / 3, 3);
+  return Eigen::Map<Eigen::Matrix<uint32_t, Eigen::Dynamic, 3, Eigen::RowMajor>>(indices.data(),
+                                                                                 indices.size() / 3, 3);
 }
 
 Vec3 PhysxCollisionShapeTriangleMesh::getScale() const {
   auto &g = mPxShape->getGeometry();
   assert(g.getType() == PxGeometryType::eTRIANGLEMESH);
   return PxVec3ToVec3(static_cast<PxTriangleMeshGeometry const &>(g).scale.scale);
+}
+
+void PhysxCollisionShapeTriangleMesh::setScale(Vec3 scale) {
+  auto &g = mPxShape->getGeometry();
+  assert(g.getType() == PxGeometryType::eTRIANGLEMESH);
+  mPxShape->setGeometry(PxTriangleMeshGeometry((static_cast<PxTriangleMeshGeometry const &>(g)).triangleMesh,
+                                               PxMeshScale(Vec3ToPxVec3(scale), PxQuat(PxIdentity))));
+  auto aabb = mMesh->getAABB();
+  mLocalAABB = {aabb.lower * scale, aabb.upper * scale};
 }
 
 Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor>
@@ -396,8 +401,8 @@ PhysxCollisionShapeTriangleMesh::getVertices() const {
     vertices.push_back(gv[i].y);
     vertices.push_back(gv[i].z);
   }
-  return Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor>>(
-      vertices.data(), vertices.size() / 3, 3);
+  return Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor>>(vertices.data(),
+                                                                              vertices.size() / 3, 3);
 }
 
 Eigen::Matrix<uint32_t, Eigen::Dynamic, 3, Eigen::RowMajor>
@@ -424,8 +429,8 @@ PhysxCollisionShapeTriangleMesh::getTriangles() const {
     }
   }
 
-  return Eigen::Map<Eigen::Matrix<uint32_t, Eigen::Dynamic, 3, Eigen::RowMajor>>(
-      indices.data(), indices.size() / 3, 3);
+  return Eigen::Map<Eigen::Matrix<uint32_t, Eigen::Dynamic, 3, Eigen::RowMajor>>(indices.data(),
+                                                                                 indices.size() / 3, 3);
 }
 
 // AABB
@@ -497,28 +502,27 @@ std::shared_ptr<PhysxCollisionShape> PhysxCollisionShapeSphere::clone() const {
 }
 
 std::shared_ptr<PhysxCollisionShape> PhysxCollisionShapeCapsule::clone() const {
-  auto shape = std::make_shared<PhysxCollisionShapeCapsule>(getRadius(), getHalfLength(),
-                                                            getPhysicalMaterial());
+  auto shape =
+      std::make_shared<PhysxCollisionShapeCapsule>(getRadius(), getHalfLength(), getPhysicalMaterial());
   copyProperties(*shape);
   return shape;
 }
 
 std::shared_ptr<PhysxCollisionShape> PhysxCollisionShapeCylinder::clone() const {
-  auto shape = std::make_shared<PhysxCollisionShapeCylinder>(getRadius(), getHalfLength(),
-                                                             getPhysicalMaterial());
+  auto shape =
+      std::make_shared<PhysxCollisionShapeCylinder>(getRadius(), getHalfLength(), getPhysicalMaterial());
   copyProperties(*shape);
   return shape;
 }
 
 std::shared_ptr<PhysxCollisionShape> PhysxCollisionShapeConvexMesh::clone() const {
-  auto shape = std::make_shared<PhysxCollisionShapeConvexMesh>(getMesh(), getScale(),
-                                                               getPhysicalMaterial());
+  auto shape = std::make_shared<PhysxCollisionShapeConvexMesh>(getMesh(), getScale(), getPhysicalMaterial());
   return shape;
 }
 
 std::shared_ptr<PhysxCollisionShape> PhysxCollisionShapeTriangleMesh::clone() const {
-  auto shape = std::make_shared<PhysxCollisionShapeTriangleMesh>(getMesh(), getScale(),
-                                                                 getPhysicalMaterial());
+  auto shape =
+      std::make_shared<PhysxCollisionShapeTriangleMesh>(getMesh(), getScale(), getPhysicalMaterial());
   copyProperties(*shape);
   return shape;
 }

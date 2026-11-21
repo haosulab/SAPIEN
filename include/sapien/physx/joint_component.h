@@ -59,8 +59,7 @@ class PhysxDriveComponent : public PhysxJointComponent {
 public:
   enum class DriveMode { eFORCE, eACCELERATION };
 
-  static std::shared_ptr<PhysxDriveComponent>
-  Create(std::shared_ptr<PhysxRigidBodyComponent> body);
+  static std::shared_ptr<PhysxDriveComponent> Create(std::shared_ptr<PhysxRigidBodyComponent> body);
 
   /** should only be called internally */
   PhysxDriveComponent(std::shared_ptr<PhysxRigidBodyComponent> body);
@@ -70,8 +69,7 @@ public:
   void setZLimit(float low, float high, float stiffness, float damping);
   void setXTwistLimit(float low, float high, float stiffness, float damping);
   void setYZConeLimit(float yAngle, float zAngle, float stiffness, float damping);
-  void setYZPyramidLimit(float yLow, float yHigh, float zLow, float zHigh, float stiffness,
-                         float damping);
+  void setYZPyramidLimit(float yLow, float yHigh, float zLow, float zHigh, float stiffness, float damping);
 
   std::tuple<float, float, float, float> getXLimit() const;
   std::tuple<float, float, float, float> getYLimit() const;
@@ -105,8 +103,8 @@ public:
   ~PhysxDriveComponent();
 
 private:
-  void setLinearLimit(::physx::PxD6Axis::Enum axis, float low, float high, float stiffness,
-                      float damping);
+  void setLinearLimit(::physx::PxD6Axis::Enum axis, float low, float high, float stiffness, float damping);
+  std::tuple<float, float, float, float> getLinearLimit(::physx::PxD6Axis::Enum axis) const;
   void setDrive(::physx::PxD6Drive::Enum drive, float stiffness, float damping, float forceLimit,
                 DriveMode mode);
 
@@ -140,8 +138,7 @@ private:
 
 class PhysxDistanceJointComponent : public PhysxJointComponent {
 public:
-  static std::shared_ptr<PhysxDistanceJointComponent>
-  Create(std::shared_ptr<PhysxRigidBodyComponent> body);
+  static std::shared_ptr<PhysxDistanceJointComponent> Create(std::shared_ptr<PhysxRigidBodyComponent> body);
   PhysxDistanceJointComponent(std::shared_ptr<PhysxRigidBodyComponent> body);
 
   void setLimit(float low, float high, float stiffness, float damping);

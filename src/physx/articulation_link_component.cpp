@@ -64,8 +64,8 @@ void PhysxArticulationJoint::setType(PxArticulationJointType::Enum type) {
 
   // root
   bool fixBase = type == PxArticulationJointType::eFIX;
-  mLink.lock()->getArticulation()->getPxArticulation()->setArticulationFlag(
-      PxArticulationFlag::eFIX_BASE, fixBase);
+  mLink.lock()->getArticulation()->getPxArticulation()->setArticulationFlag(PxArticulationFlag::eFIX_BASE,
+                                                                            fixBase);
 }
 
 PxArticulationJointType::Enum PhysxArticulationJoint::getType() const {
@@ -132,8 +132,7 @@ Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor> PhysxArticulationJoint:
   if (auto j = getPxJoint()) {
     for (uint32_t i = 0; i < mAxes.size(); ++i) {
       if (j->getMotion(mAxes[i]) == PxArticulationMotion::eFREE) {
-        result.row(i) << -std::numeric_limits<float>::infinity(),
-            std::numeric_limits<float>::infinity();
+        result.row(i) << -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity();
         continue;
       }
       auto limit = j->getLimitParams(mAxes[i]);
@@ -167,8 +166,7 @@ void PhysxArticulationJoint::setArmature(Eigen::VectorXf const &armature) {
   }
 }
 
-void PhysxArticulationJoint::setLimit(
-    Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor> const &limit) {
+void PhysxArticulationJoint::setLimit(Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor> const &limit) {
   if (mAxes.size() != static_cast<size_t>(limit.rows())) {
     throw std::runtime_error("limit must match joint dof");
   }
@@ -367,14 +365,12 @@ void PhysxArticulationLinkComponent::onAddToScene(Scene &scene) {
   mArticulation->internalNotifyAddToScene(this, scene);
   auto system = scene.getPhysxSystem();
 
-  system->registerComponent(
-      std::static_pointer_cast<PhysxArticulationLinkComponent>(shared_from_this()));
+  system->registerComponent(std::static_pointer_cast<PhysxArticulationLinkComponent>(shared_from_this()));
 }
 void PhysxArticulationLinkComponent::onRemoveFromScene(Scene &scene) {
   mArticulation->internalNotifyRemoveFromScene(this, scene);
   auto system = scene.getPhysxSystem();
-  system->unregisterComponent(
-      std::static_pointer_cast<PhysxArticulationLinkComponent>(shared_from_this()));
+  system->unregisterComponent(std::static_pointer_cast<PhysxArticulationLinkComponent>(shared_from_this()));
 }
 void PhysxArticulationLinkComponent::onSetPose(Pose const &pose) {
   if (!isUsingDirectGPUAPI()) {
@@ -391,24 +387,33 @@ void PhysxArticulationLinkComponent::syncPoseToEntity() {
   getEntity()->internalSyncPose(PxTransformToPose(getPxActor()->getGlobalPose()));
 }
 
-void PhysxArticulationLinkComponent::setParent(
-    std::shared_ptr<PhysxArticulationLinkComponent> parent) {
+void PhysxArticulationLinkComponent::setParent(std::shared_ptr<PhysxArticulationLinkComponent> parent) {
   auto currentParent = getParent();
   if (parent == currentParent) {
     return;
   }
 
+  if (getArticulation()->getPxArticulation()->getNbFixedTendons() != 0) {
+    throw std::runtime_error("disconnecting is not allowed when the articulation has tendons");
+  }
+
+  if (getArticulation()->getPxArticulation()->getNbSpatialTendons() != 0) {
+    throw std::runtime_error("disconnecting is not allowed when the articulation has tendons");
+  }
+
+  if (getArticulation()->getPxArticulation()->getNbMimicJoints() != 0) {
+    throw std::runtime_error("disconnecting is not allowed when the articulation has mimic joints");
+  }
+
   // update references
   if (currentParent) {
     std::erase_if(currentParent->mChildren, [this](auto c) {
-      return c.lock() ==
-             std::static_pointer_cast<PhysxArticulationLinkComponent>(shared_from_this());
+      return c.lock() == std::static_pointer_cast<PhysxArticulationLinkComponent>(shared_from_this());
     });
   }
   mParent = parent;
 
-  auto newArticulation =
-      parent ? parent->getArticulation() : std::make_shared<PhysxArticulation>();
+  auto newArticulation = parent ? parent->getArticulation() : std::make_shared<PhysxArticulation>();
 
   // handle children
   auto links = mArticulation->findDescendants(
@@ -529,9 +534,8 @@ void PhysxArticulationLinkComponent::setParent(
 
     auto joint = links[i]->getJoint();
     if (pxjoint) {
-      joint->setType(info.jointType == PxArticulationJointType::eUNDEFINED
-                         ? PxArticulationJointType::eFIX
-                         : info.jointType);
+      joint->setType(info.jointType == PxArticulationJointType::eUNDEFINED ? PxArticulationJointType::eFIX
+                                                                           : info.jointType);
       pxjoint->setFrictionCoefficient(info.jointFriction);
       pxjoint->setParentPose(info.jointParentPose);
       pxjoint->setChildPose(info.jointChildPose);
@@ -550,11 +554,13 @@ void PhysxArticulationLinkComponent::setParent(
         pxjoint->setArmature(axes[i], info.jointArmature[i]);
       }
     } else {
+      // HACK: this is used to clear the cached mAxes of the old joint
+      joint->setType(PxArticulationJointType::eUNDEFINED);
+
       bool fixBase = info.jointType == PxArticulationJointType::eFIX;
-      newArticulation->getPxArticulation()->setArticulationFlag(PxArticulationFlag::eFIX_BASE,
-                                                                fixBase);
+      newArticulation->getPxArticulation()->setArticulationFlag(PxArticulationFlag::eFIX_BASE, fixBase);
+
       newArticulation->getPxArticulation()->setRootGlobalPose(info.linkPose);
-      // TODO: sync pose with sapien
       newArticulation->getPxArticulation()->setRootLinearVelocity(info.velocity);
       newArticulation->getPxArticulation()->setRootAngularVelocity(info.angularVelocity);
     }
@@ -582,9 +588,7 @@ int PhysxArticulationLinkComponent::getIndex() const {
 bool PhysxArticulationLinkComponent::isSleeping() const {
   return getArticulation()->getPxArticulation()->isSleeping();
 }
-void PhysxArticulationLinkComponent::wakeUp() {
-  return getArticulation()->getPxArticulation()->wakeUp();
-}
+void PhysxArticulationLinkComponent::wakeUp() { return getArticulation()->getPxArticulation()->wakeUp(); }
 void PhysxArticulationLinkComponent::putToSleep() {
   return getArticulation()->getPxArticulation()->putToSleep();
 }
@@ -600,8 +604,7 @@ PhysxArticulationLinkComponent::~PhysxArticulationLinkComponent() {
 }
 
 std::vector<std::shared_ptr<PhysxArticulationLinkComponent>>
-PhysxArticulationLinkComponent::cloneArticulation(
-    std::shared_ptr<PhysxArticulationLinkComponent> root) {
+PhysxArticulationLinkComponent::cloneArticulation(std::shared_ptr<PhysxArticulationLinkComponent> root) {
 
   SAPIEN_PROFILE_FUNCTION
 
@@ -609,8 +612,7 @@ PhysxArticulationLinkComponent::cloneArticulation(
     throw std::runtime_error("clone articulation takes a root link");
   }
 
-  std::map<std::shared_ptr<PhysxArticulationLinkComponent>,
-           std::shared_ptr<PhysxArticulationLinkComponent>>
+  std::map<std::shared_ptr<PhysxArticulationLinkComponent>, std::shared_ptr<PhysxArticulationLinkComponent>>
       old2new;
 
   auto links = root->getArticulation()->getLinksAdditionOrder();
@@ -627,9 +629,6 @@ PhysxArticulationLinkComponent::cloneArticulation(
 
     // TODO: move to rigid body class
 
-    // update mass
-    newLink->setAutoComputeMass(false);
-
     for (auto s : link->getCollisionShapes()) {
       newLink->attachCollision(s->clone());
     }
@@ -637,7 +636,6 @@ PhysxArticulationLinkComponent::cloneArticulation(
     newLink->setMass(link->getMass());
     newLink->setInertia(link->getInertia());
     newLink->setCMassLocalPose(link->getCMassLocalPose());
-    newLink->mAutoComputeMass = link->getAutoComputeMass();
 
     // other properties
     newLink->setName(link->getName());

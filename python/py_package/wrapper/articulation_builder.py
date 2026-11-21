@@ -130,6 +130,7 @@ class ArticulationBuilder:
             ]:
                 link_component.joint.limit = np.array(b.joint_record.limits).flatten()
                 link_component.joint.set_drive_property(0, b.joint_record.damping)
+                link_component.joint.set_friction(b.joint_record.friction)
 
             links.append(link_component)
             entities.append(entity)
@@ -160,33 +161,7 @@ class ArticulationBuilder:
                 multiplier = mimic.multiplier
                 offset = mimic.offset
 
-                # joint mimics parent
-                if joint.parent_link == mimic_joint.child_link:
-                    if joint.parent_link.parent is None:
-                        # TODO warn
-                        # tendon must be attached to grandparent
-                        continue
-                    root = joint.parent_link.parent
-                    parent = joint.parent_link
-                    child = joint.child_link
-                    articulation.create_fixed_tendon(
-                        [root, parent, child],
-                        [0, -multiplier, 1],
-                        [0, -1 / multiplier, 1],
-                        rest_length=offset,
-                        stiffness=1e5,
-                    )
-                # 2 children mimic each other
-                if joint.parent_link == mimic_joint.parent_link:
-                    assert joint.parent_link is not None
-                    root = joint.parent_link
-                    articulation.create_fixed_tendon(
-                        [root, joint.child_link, mimic_joint.child_link],
-                        [0, -multiplier, 1],
-                        [0, -1 / multiplier, 1],
-                        rest_length=offset,
-                        stiffness=1e5,
-                    )
+                articulation.create_mimic_joint(joint, mimic_joint, multiplier, offset)
 
         for l in links:
             self.scene.add_entity(l)

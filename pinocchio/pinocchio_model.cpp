@@ -61,9 +61,25 @@ Eigen::VectorXd PinocchioModel::posS2P(const Eigen::VectorXd &qext) {
       qint[start_idx] = std::cos(qext[count]);
       qint[start_idx + 1] = std::sin(qext[count]);
       break;
+    case 7: {
+      auto pose = pinocchio::exp6(qext(Eigen::seqN(count, 6)));
+      auto p = pose.translation();
+      pinocchio::SE3::Quaternion q(pose.rotation());
+      // pos
+      qint[start_idx] = p.x();
+      qint[start_idx + 1] = p.y();
+      qint[start_idx + 2] = p.z();
+
+      // quat
+      qint[start_idx + 3] = q.x();
+      qint[start_idx + 4] = q.y();
+      qint[start_idx + 5] = q.z();
+      qint[start_idx + 6] = q.w();
+      break;
+    }
     default:
-      throw std::runtime_error(
-          "Unsupported joint in computation. Currently support: fixed, revolute, prismatic");
+      throw std::runtime_error("Unsupported joint in computation. Currently support: floating, "
+                               "fixed, revolute, prismatic");
     }
     count += NV[N];
   }
@@ -86,9 +102,30 @@ Eigen::VectorXd PinocchioModel::posP2S(const Eigen::VectorXd &qint) {
     case 2:
       qext[count] = std::atan2(qint[start_idx + 1], qint[start_idx]);
       break;
+    case 7: {
+      pinocchio::SE3 pose;
+      pose.translation({qint[start_idx], qint[start_idx + 1], qint[start_idx + 2]});
+      pose.rotation(Eigen::Quaterniond(qint[start_idx + 6], qint[start_idx + 3],
+                                       qint[start_idx + 4], qint[start_idx + 5])
+                        .toRotationMatrix());
+      auto res = pinocchio::log6(pose);
+      auto linear = res.linear();
+      auto angular = res.angular();
+
+      // pos
+      qext[count] = linear.x();
+      qext[count + 1] = linear.y();
+      qext[count + 2] = linear.z();
+
+      // quat
+      qext[count + 3] = angular.x();
+      qext[count + 4] = angular.y();
+      qext[count + 5] = angular.z();
+      break;
+    }
     default:
-      throw std::runtime_error(
-          "Unsupported joint in computation. Currently support: fixed, revolute, prismatic");
+      throw std::runtime_error("Unsupported joint in computation. Currently support: floating, "
+                               "fixed, revolute, prismatic");
     }
     count += NV[N];
   }
@@ -354,7 +391,6 @@ Returns:
       .def("get_link_jacobian", &PinocchioModel::getLinkJacobian,
            R"doc(
 Given link index, get the Jacobian. Must be called after compute_full_jacobian.
-
 Args:
   link_index: index of the link
   local: True for world(spatial) frame; False for link(body) frame

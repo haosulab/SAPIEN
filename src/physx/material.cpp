@@ -24,7 +24,8 @@ PhysxMaterial::PhysxMaterial(float staticFriction, float dynamicFriction, float 
     : mEngine(PhysxEngine::Get()) {
   mMaterial =
       mEngine->getPxPhysics()->createMaterial(staticFriction, dynamicFriction, restitution);
-  mMaterial->setFlag(PxMaterialFlag::eIMPROVED_PATCH_FRICTION, true);
+  // PhysX 5.11 removed PxMaterialFlag::eIMPROVED_PATCH_FRICTION: improved patch
+  // friction is always enabled, so the old setFlag call is no longer needed.
 }
 
 PhysxMaterial::~PhysxMaterial() { mMaterial->release(); }

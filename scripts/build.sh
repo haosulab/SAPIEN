@@ -7,16 +7,11 @@ while [[ "$#" -gt 0 ]]; do
     case $1 in
         --debug) DEBUG=1;;
         --profile) PROFILE=1;;
-        35) VERSION="35";;
-        36) VERSION="36";;
-        37) VERSION="37";;
-        38) VERSION="38";;
-        39) VERSION="39";;
-        310) VERSION="310";;
         311) VERSION="311";;
         312) VERSION="312";;
         313) VERSION="313";;
         314) VERSION="314";;
+        315) VERSION="315";;
     esac
     shift
 done
@@ -26,7 +21,7 @@ done
 
 function build_sapien() {
   echo "Building SAPIEN"
-  BIN=/opt/python/cp310-cp310/bin/python
+  BIN=/opt/python/cp311-cp311/bin/python
   COMMAND="${BIN} setup.py bdist_wheel"
   [ $PROFILE ] && COMMAND="${BIN} setup.py bdist_wheel --profile"
   [ $DEBUG ] && COMMAND="${BIN} setup.py bdist_wheel --debug"
@@ -37,25 +32,7 @@ function build_pybind() {
   echo "Building Pybind"
 
   PY_VERSION=$1
-  if [ "$PY_VERSION" -eq 35 ]; then
-      PY_DOT=3.5
-      EXT="m"
-  elif [ "$PY_VERSION" -eq 36 ]; then
-      PY_DOT=3.6
-      EXT="m"
-  elif [ "$PY_VERSION" -eq 37 ]; then
-      PY_DOT=3.8
-      EXT="m"
-  elif [ "$PY_VERSION" -eq 38 ]; then
-      PY_DOT=3.8
-      EXT=""
-  elif [ "$PY_VERSION" -eq 39 ]; then
-      PY_DOT=3.9
-      EXT=""
-  elif [ "$PY_VERSION" -eq 310 ]; then
-      PY_DOT=3.10
-      EXT=""
-  elif [ "$PY_VERSION" -eq 311 ]; then
+  if [ "$PY_VERSION" -eq 311 ]; then
       PY_DOT=3.11
       EXT=""
   elif [ "$PY_VERSION" -eq 312 ]; then
@@ -66,6 +43,9 @@ function build_pybind() {
       EXT=""
   elif [ "$PY_VERSION" -eq 314 ]; then
       PY_DOT=3.14
+      EXT=""
+  elif [ "$PY_VERSION" -eq 315 ]; then
+      PY_DOT=3.15
       EXT=""
   else
     echo "Error, python version not found!"
@@ -82,17 +62,29 @@ function build_pybind() {
   if test -f "$WHEEL_NAME"; then
     echo "$FILE exist, begin audit and repair"
   fi
-  auditwheel repair "${WHEEL_NAME}" --exclude 'libvulkan*' --exclude 'libOpenImageDenoise*' --internal libsapien --internal libsvulkan2
+  # The X11 stack must stay external: a hash-mangled vendored libX11 beside
+  # the system libxcb runs two different xcb implementations over one X
+  # connection and corrupts the heap inside libGLX_nvidia. The C/C++ runtime
+  # is excluded for the same single-instance reason. (Same configuration as
+  # the internal wheel build.)
+  auditwheel repair "${WHEEL_NAME}" \
+    --exclude 'libvulkan*' --exclude 'libOpenImageDenoise*' \
+    --exclude 'libstdc++*' --exclude 'libgcc_s*' \
+    --exclude 'libc.so*' --exclude 'libm.so*' --exclude 'libpthread*' \
+    --exclude 'libdl*' --exclude 'librt*' --exclude 'ld-linux*' \
+    --exclude 'libX11*' --exclude 'libxcb*' --exclude 'libXau*' \
+    --exclude 'libXdmcp*' --exclude 'libbsd*' --exclude 'libmd*' \
+    --internal libsapien --internal libsvulkan2
 }
 
 build_sapien
 if [ -z "${VERSION}" ]
 then
-   build_pybind 310
    build_pybind 311
    build_pybind 312
    build_pybind 313
    build_pybind 314
+   build_pybind 315
 else
    build_pybind $VERSION
 fi

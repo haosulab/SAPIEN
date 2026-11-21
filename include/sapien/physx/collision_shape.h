@@ -182,6 +182,7 @@ public:
   // PhysxCollisionShapeConvexMesh(PhysxCollisionShapeConvexMesh const &other);
 
   Vec3 getScale() const;
+  void setScale(Vec3 scale);
   Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> getVertices() const;
   Eigen::Matrix<uint32_t, Eigen::Dynamic, 3, Eigen::RowMajor> getTriangles() const;
 
@@ -212,6 +213,7 @@ public:
                                   std::shared_ptr<PhysxMaterial> material = nullptr);
 
   Vec3 getScale() const;
+  void setScale(Vec3 scale);
   Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> getVertices() const;
   Eigen::Matrix<uint32_t, Eigen::Dynamic, 3, Eigen::RowMajor> getTriangles() const;
 

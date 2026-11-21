@@ -1,7 +1,8 @@
 from __future__ import annotations
 from _warnings import warn
+from importlib import resources
 import os as os
-from pathlib._local import Path
+from pathlib import Path
 import platform as platform
 from sapien.pysapien import Component
 from sapien.pysapien import CudaArray
@@ -21,6 +22,7 @@ from sapien.wrapper.engine import Engine
 from sapien.wrapper.renderer import SapienRenderer
 from sapien.wrapper.scene import Scene
 from sapien.wrapper.scene import Widget
+import sys as sys
 from . import _oidn_tricks
 from . import _vulkan_tricks
 from . import asset
@@ -32,5 +34,5 @@ from . import render
 from . import utils
 from . import version
 from . import wrapper
-__all__ = ['ActorBuilder', 'ArticulationBuilder', 'Component', 'CudaArray', 'Device', 'Engine', 'Entity', 'Path', 'PinocchioModel', 'Pose', 'SapienRenderer', 'Scene', 'SceneConfig', 'System', 'Widget', 'asset', 'internal_renderer', 'math', 'os', 'physx', 'platform', 'profile', 'pysapien', 'pysapien_pinocchio', 'render', 'set_log_level', 'simsense', 'utils', 'version', 'warn', 'wrapper']
-__version__: str = '3.0.0.dev20251208+67ae2a67'
+__all__ = ['ActorBuilder', 'ArticulationBuilder', 'Component', 'CudaArray', 'Device', 'Engine', 'Entity', 'Path', 'PinocchioModel', 'Pose', 'SapienRenderer', 'Scene', 'SceneConfig', 'System', 'Widget', 'asset', 'internal_renderer', 'math', 'os', 'physx', 'platform', 'profile', 'pysapien', 'pysapien_pinocchio', 'render', 'resources', 'set_log_level', 'simsense', 'sys', 'utils', 'version', 'warn', 'wrapper']
+__version__: str

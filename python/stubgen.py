@@ -208,6 +208,16 @@ class FixFindComponentByType(IParser):
         return result
 
 
+class FixDynamicVersion(IParser):
+    def handle_module(self, path: QualifiedName, module: types.ModuleType) -> Module | None:
+        result = super().handle_module(path, module)
+        if result is not None and str(path) == "sapien":
+            for attribute in result.attributes:
+                if str(attribute.name) == "__version__":
+                    attribute.value = None
+        return result
+
+
 def stub_parser() -> IParser:
     error_handlers_top: list[type] = [
         LoggerData,
@@ -227,6 +237,7 @@ def stub_parser() -> IParser:
         FilterTypingModuleAttributes,
         FixPEP585CollectionNames,
         FixTorchJax,
+        FixDynamicVersion,
         FixCppFunction,
         FixNoneParameterType,
         FixTypingTypeNames,

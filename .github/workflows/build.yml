@@ -1,6 +1,7 @@
 name: Build
 
 on:
+  workflow_dispatch:
   push:
     branches: [main, dev]
 
@@ -12,17 +13,27 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      packages: read  # pull the private ghcr.io/haosulab/sapien-build-env image
     container:
-      image: fxiangucsd/sapien-build-env:3.9
+      image: ghcr.io/haosulab/sapien-build-env:1.1
+      credentials:
+        # same-repo GITHUB_TOKEN: the image workflow's push links the
+        # private package to this repository
+        username: ${{ github.actor }}
+        password: ${{ github.token }}
       env:
         CMAKE_BUILD_PARALLEL_LEVEL: 2
+        # setup.py enables SAPIEN_CUDA iff CUDA_PATH is set (the image
+        # deliberately does not bake it as ENV, so the CUDA-less aarch64
+        # image never sees it)
+        CUDA_PATH: /usr/local/cuda-12.8
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          submodules: "true"
           fetch-depth: 0
           fetch-tags: true
+          submodules: "true"
       - name: Set up cmake cache
         uses: actions/cache@v3
         with:
@@ -40,17 +51,21 @@ jobs:
     runs-on: ubuntu-22.04-arm
     permissions:
       contents: write
+      packages: read  # pull the private ghcr.io/haosulab/sapien-build-env image
     container:
-      image: fxiangucsd/sapien-build-env-aarch64:3.9
+      image: ghcr.io/haosulab/sapien-build-env:1.1-aarch64
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ github.token }}
       env:
         CMAKE_BUILD_PARALLEL_LEVEL: 2
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          submodules: "true"
           fetch-depth: 0
           fetch-tags: true
+          submodules: "true"
       - name: Build wheels
         run: "git config --global --add safe.directory '*' && ./scripts/build_aarch64.sh"
       - name: Upload wheels
@@ -67,9 +82,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          submodules: "true"
           fetch-depth: 0
           fetch-tags: true
+          submodules: "true"
       - name: setup CUDA
         shell: bash
         run: |
@@ -100,17 +115,20 @@ jobs:
     needs: build-windows-sapien
     strategy:
       matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        python-version: ["3.11", "3.12", "3.13", "3.14", "3.15"]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          submodules: "true"
           fetch-depth: 0
           fetch-tags: true
+          submodules: "true"
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+          # "3.15" only matches 3.15.0rc3 until the final release; stable
+          # versions still resolve to their latest finals
+          allow-prereleases: true
       - name: Download SAPIEN
         uses: actions/download-artifact@v4
         with:
@@ -136,20 +154,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          submodules: "true"
           fetch-depth: 0
           fetch-tags: true
-      - name: Initialize submodules
-        run: git submodule update --init --recursive
+          submodules: "true"
       - name: Setup CMake 3.x
         uses: jwlawson/actions-setup-cmake@v2
         with:
           cmake-version: '3.31.x'
       - name: Set up pyenv
         shell: bash
+        env:
+          # brew auto-update is chronically broken on hosted mac runners
+          # (brew link failures), so it stays disabled per-command; but we
+          # run one deliberate update here because the image's cached pyenv
+          # bottle (2.8.4) predates the 3.15.0rc3 python definition and the
+          # upgrade must come from a fresh formula index
+          HOMEBREW_NO_AUTO_UPDATE: "1"
         run: |
-          brew update
-          brew install pyenv
+          brew update || true
+          brew install pyenv || true
+          brew upgrade pyenv || true
+          pyenv --version
           echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
           echo '[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
           echo 'eval "$(pyenv init - bash)"' >> ~/.bashrc
@@ -178,11 +203,6 @@ jobs:
       - name: Download wheels
         uses: actions/download-artifact@v4
         with:
-          name: windows-wheel-3.10
-          path: wheelhouse
-      - name: Download wheels
-        uses: actions/download-artifact@v4
-        with:
           name: windows-wheel-3.11
           path: wheelhouse
       - name: Download wheels
@@ -199,6 +219,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: windows-wheel-3.14
+          path: wheelhouse
+      - name: Download wheels
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-wheel-3.15
           path: wheelhouse
       - name: Download wheels
         uses: actions/download-artifact@v4
