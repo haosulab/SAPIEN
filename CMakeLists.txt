@@ -88,6 +88,7 @@ endif()
 add_subdirectory("3rd_party/sapien-vulkan-2" EXCLUDE_FROM_ALL)
 
 if (${SAPIEN_CUDA})
+    set_target_properties(OpenImageDenoise_device_cuda PROPERTIES SKIP_BUILD_RPATH ON)
     add_subdirectory("3rd_party/simsense")
     set_target_properties(simsense PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib")
     target_compile_definitions(simsense PUBLIC SAPIEN_SIMSENSE)

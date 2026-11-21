@@ -69,6 +69,7 @@ function build_pybind() {
   # the internal wheel build.)
   auditwheel repair "${WHEEL_NAME}" \
     --exclude 'libvulkan*' --exclude 'libOpenImageDenoise*' \
+    --exclude 'libcuda.so*' \
     --exclude 'libstdc++*' --exclude 'libgcc_s*' \
     --exclude 'libc.so*' --exclude 'libm.so*' --exclude 'libpthread*' \
     --exclude 'libdl*' --exclude 'librt*' --exclude 'ld-linux*' \

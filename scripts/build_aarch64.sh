@@ -67,6 +67,7 @@ function build_pybind() {
   # an honest tag: the physx artifacts are built against glibc 2.28.
   auditwheel repair "${WHEEL_NAME}" --plat manylinux_2_28_aarch64 \
     --exclude 'libvulkan*' --exclude 'libOpenImageDenoise*' \
+    --exclude 'libcuda.so*' \
     --exclude 'libstdc++*' --exclude 'libgcc_s*' \
     --exclude 'libc.so*' --exclude 'libm.so*' --exclude 'libpthread*' \
     --exclude 'libdl*' --exclude 'librt*' --exclude 'ld-linux*' \
