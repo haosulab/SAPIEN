@@ -189,6 +189,7 @@ jobs:
           path: ./dist/*.whl
 
   release:
+    if: github.ref_name == 'dev'
     runs-on: ubuntu-latest
     needs:
       [
