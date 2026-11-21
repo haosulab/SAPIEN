@@ -24,7 +24,7 @@ function build() {
   fi
 
   pyenv exec pip install setuptools wheel || return 1
-  pyenv exec python setup.py bdist_wheel --build-dir=build --plat-name macosx_12_0_universal2 || return 1
+  pyenv exec python setup.py bdist_wheel --build-dir=build --plat-name macosx_13_3_universal2 || return 1
 
   CPTAG="cp${PY_MAJOR_MINOR/./}"
   ls "dist/"*-"${CPTAG}"-"${CPTAG}"-macosx*.whl || {
