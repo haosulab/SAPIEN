@@ -141,7 +141,11 @@ def build_sapien(sapien_source_dir, sapien_build_dir):
         # under CMake 3.
         "-DCMAKE_POLICY_VERSION_MINIMUM=3.5",
     ]
-    
+
+    driver_library = os.environ.get("SAPIEN_CUDA_DRIVER_LIBRARY")
+    if driver_library:
+        cmake_args += [f"-DCUDA_cuda_driver_LIBRARY:FILEPATH={driver_library}"]
+
     if platform.system() == "Darwin":
         cmake_args += ["-DCMAKE_TOOLCHAIN_FILE=toolchains/macos.toolchain.cmake"]
 

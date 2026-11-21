@@ -34,17 +34,20 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
           submodules: "true"
-      - name: Install CUDA driver libraries for OIDN
+      - name: Stage CUDA driver libraries for OIDN
         run: |
           curl --fail --silent --show-error --output /tmp/nvidia-driver-cuda-libs.rpm \
             https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/nvidia-driver-cuda-libs-580.126.20-1.el8.x86_64.rpm
           echo "365fb46442c843910afa9c937dbe6de428a8eb1c59c9a94a6adb201af57fb1e3  /tmp/nvidia-driver-cuda-libs.rpm" | sha256sum --check
-          dnf install -y /tmp/nvidia-driver-cuda-libs.rpm
+          dnf install -y cpio
+          mkdir -p /tmp/sapien-cuda-driver
+          rpm2cpio /tmp/nvidia-driver-cuda-libs.rpm | (cd /tmp/sapien-cuda-driver && cpio --no-absolute-filenames --quiet -idm)
+          echo "SAPIEN_CUDA_DRIVER_LIBRARY=/tmp/sapien-cuda-driver/usr/lib64/libcuda.so" >> "$GITHUB_ENV"
       - name: Set up cmake cache
         uses: actions/cache@v3
         with:
           path: docker_sapien_build/_sapien_deps
-          key: ${{ runner.os }}.${{ hashFiles('**/*.cmake', '**/CMakeLists.txt') }}
+          key: ${{ runner.os }}.${{ hashFiles('**/*.cmake', '**/*.patch', '**/CMakeLists.txt') }}
       - name: Build wheels
         run: "git config --global --add safe.directory '*' && ./scripts/build.sh"
       - name: Upload wheels
