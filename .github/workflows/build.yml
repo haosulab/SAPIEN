@@ -42,7 +42,13 @@ jobs:
           dnf install -y cpio
           mkdir -p /tmp/sapien-cuda-driver
           rpm2cpio /tmp/nvidia-driver-cuda-libs.rpm | (cd /tmp/sapien-cuda-driver && cpio --no-absolute-filenames --quiet -idm)
-          echo "SAPIEN_CUDA_DRIVER_LIBRARY=/tmp/sapien-cuda-driver/usr/lib64/libcuda.so" >> "$GITHUB_ENV"
+          if [ -e "$CUDA_PATH/lib64/stubs/libcuda.so" ] || [ -L "$CUDA_PATH/lib64/stubs/libcuda.so" ]; then
+            echo "CUDA link library already exists: $CUDA_PATH/lib64/stubs/libcuda.so" >&2
+            exit 1
+          fi
+          mkdir -p "$CUDA_PATH/lib64/stubs"
+          cp -a /tmp/sapien-cuda-driver/usr/lib64/libcuda.so* "$CUDA_PATH/lib64/stubs/"
+          echo "SAPIEN_CUDA_DRIVER_LIBRARY=$CUDA_PATH/lib64/stubs/libcuda.so" >> "$GITHUB_ENV"
       - name: Set up cmake cache
         uses: actions/cache@v3
         with:

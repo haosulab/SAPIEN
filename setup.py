@@ -129,6 +129,7 @@ def build_sapien(sapien_source_dir, sapien_build_dir):
 
     if os.environ.get("CUDA_PATH") is not None:
         cmake_args += ["-DSAPIEN_CUDA=ON"]
+        cmake_args += [f"-DCUDAToolkit_ROOT:PATH={os.environ['CUDA_PATH']}"]
     else:
         cmake_args += ["-DSAPIEN_CUDA=OFF"]
 
