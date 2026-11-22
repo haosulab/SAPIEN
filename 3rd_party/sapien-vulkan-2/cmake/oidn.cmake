@@ -1,10 +1,8 @@
 include(FetchContent)
-find_package(Git REQUIRED)
 FetchContent_Declare(
     oidn
     URL https://github.com/RenderKit/oidn/releases/download/v2.4.1/oidn-2.4.1.src.tar.gz
     URL_HASH MD5=83f2ae3e891595bba0e85a3ed6d6b653
-    PATCH_COMMAND ${CMAKE_COMMAND} "-DGIT_EXECUTABLE=${GIT_EXECUTABLE}" "-DSOURCE_DIR=<SOURCE_DIR>" -P "${CMAKE_CURRENT_LIST_DIR}/oidn-relative-rpath.cmake"
 )
 
 set(OIDN_APPS OFF CACHE BOOL "" FORCE)
