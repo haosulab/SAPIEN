@@ -7,7 +7,7 @@ if(NOT CMAKE_OSX_ARCHITECTURES)
 endif()
 
 if(NOT CMAKE_OSX_DEPLOYMENT_TARGET)
-    set(CMAKE_OSX_DEPLOYMENT_TARGET "13.3" CACHE STRING "Set the default os version" FORCE)
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "26.0" CACHE STRING "Set the default os version" FORCE)
 endif()
 
 if(NOT CMAKE_Fortran_COMPILER)

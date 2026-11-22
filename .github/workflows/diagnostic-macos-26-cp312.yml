@@ -1,0 +1,201 @@
+# One-shot CP312 linker diagnostic on the current stable GA macOS runner.
+# Runs only on push to diagnostic/macos-26-cp312-linker; workflow_dispatch
+# would need this file on the default branch, which stays untouched.
+# Probe-only: deployment target 26.0 (toolchains/macos.toolchain.cmake on
+# this branch), CP312 leg only, no wheel upload, no release.
+name: Diagnostic macOS 26 CP312 linker
+
+on:
+  push:
+    branches: [diagnostic/macos-26-cp312-linker]
+
+jobs:
+  macos-26-cp312-link-probe:
+    name: macOS 26 arm64 CP312 link probe
+    runs-on: macos-26
+    timeout-minutes: 120
+    permissions:
+      contents: read
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.6.app
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          submodules: "true"
+      - name: Setup CMake 3.x
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: '3.31.x'
+      - name: Record probe toolchain
+        run: |
+          sw_vers
+          echo "DEVELOPER_DIR=$DEVELOPER_DIR"
+          xcodebuild -version
+          xcrun --find clang
+          xcrun --find ld
+          xcrun clang --version
+          xcrun ld -version_details || true
+          xcrun --show-sdk-path
+          xcrun --show-sdk-version
+          test "$(xcrun --show-sdk-version)" = "26.5" || echo "WARNING: default SDK is not 26.5"
+          xcodebuild -showsdks
+          cmake --version
+      - name: Set up pyenv
+        shell: bash
+        env:
+          # auto-update stays off per command (it breaks brew link); the one
+          # explicit update here refreshes the pyenv formula index
+          HOMEBREW_NO_AUTO_UPDATE: "1"
+        run: |
+          brew update || true
+          brew install pyenv || true
+          brew upgrade pyenv || true
+          pyenv --version
+          echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
+          echo '[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
+          echo 'eval "$(pyenv init - bash)"' >> ~/.bashrc
+          source ~/.bashrc
+      - name: Build CP312 wheel with probe deployment target 26.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config --global --add safe.directory '*'
+          # ulimit -c 0: no core files; macOS still writes .ips reports,
+          # sanitized in the last step
+          ulimit -c 0
+          ulimit -c
+          # SDKROOT: pin the verified-available macosx26.5 SDK explicitly
+          export SDKROOT="$(xcrun --sdk macosx26.5 --show-sdk-path)"
+          echo "SDKROOT=$SDKROOT"
+          # VERBOSE=1: make echoes the exact link command before any crash
+          export VERBOSE=1
+          PY_MAJOR_MINOR=3.12
+          PY_DOT=$(pyenv latest -k "${PY_MAJOR_MINOR}") || {
+            echo "ERROR: pyenv has no version matching ${PY_MAJOR_MINOR}" >&2
+            exit 1
+          }
+          echo "Building wheel for ${PY_DOT}"
+          if ! pyenv versions | grep -q "${PY_DOT}"; then
+            echo "Version ${PY_DOT} is not installed, installing"
+            pyenv install "${PY_DOT}"
+          fi
+          pyenv global "${PY_DOT}"
+          pyenv rehash
+          pyenv exec python --version
+          ACTUAL_MINOR=$(pyenv exec python -c "import sys; print(f'{sys.version_info[0]}.{sys.version_info[1]}')") || exit 1
+          if [[ "${ACTUAL_MINOR}" != "${PY_MAJOR_MINOR}" ]]; then
+            echo "ERROR: pyenv exec resolved to Python ${ACTUAL_MINOR}, expected ${PY_MAJOR_MINOR}" >&2
+            exit 1
+          fi
+          pyenv exec pip install setuptools wheel
+          pyenv exec python setup.py bdist_wheel --build-dir=build --plat-name macosx_26_0_universal2 2>&1 | tee probe-build-cp312.log
+          ls "dist/"*-cp312-cp312-macosx*.whl
+      - name: Record deployment target and built artifacts
+        if: always()
+        run: |
+          find build -name CMakeCache.txt -print -exec grep -H '^CMAKE_OSX_DEPLOYMENT_TARGET' {} \; || true
+          SO=$(find build -name 'pysapien.cpython-312-darwin.so' | head -1 || true)
+          if [ -n "$SO" ]; then otool -l "$SO" | grep -A4 LC_BUILD_VERSION; else echo "no built pysapien module found"; fi
+          ls -la dist 2>/dev/null || true
+      - name: Recover driver view of the CP312 module link
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import shlex
+          import subprocess
+          import sys
+
+          log = "probe-build-cp312.log"
+          try:
+              lines = open(log, errors="replace").read().splitlines()
+          except OSError:
+              print(f"no build log at {log}; nothing to recover")
+              sys.exit(0)
+          link_lines = [
+              line
+              for line in lines
+              if "pysapien.cpython-312-darwin.so" in line
+              and ("-bundle" in line or "-shared" in line)
+          ]
+          if not link_lines:
+              print("no pysapien CP312 link command found in the build log")
+              sys.exit(0)
+          argv = shlex.split(link_lines[-1])
+          driver, rest = argv[0], argv[1:]
+          print(f"recovered link command ({len(rest)} args after driver):")
+          print(" ".join(argv))
+          print("driver expansion via -### (prints tools, does not link):")
+          try:
+              proc = subprocess.run(
+                  [driver, "-###"] + rest,
+                  capture_output=True,
+                  text=True,
+                  timeout=120,
+              )
+              print(proc.stdout)
+              print(proc.stderr)
+          except Exception as exc:
+              print(f"driver -### replay failed: {exc}")
+          sys.exit(0)
+          PY
+      - name: Capture sanitized linker crash record
+        if: failure()
+        run: |
+          python3 - <<'PY'
+          import glob
+          import json
+          import os
+          import sys
+
+          base = os.path.expanduser("~/Library/Logs/DiagnosticReports")
+          wanted = {"ld", "clang", "c++", "cc1plus"}
+          reports = []
+          for path in glob.glob(os.path.join(base, "*.ips")):
+              try:
+                  with open(path, errors="replace") as f:
+                      head = json.loads(f.readline())
+                      body_raw = f.read()
+                  if str(head.get("app_name", "")).split("-")[0] in wanted:
+                      reports.append((os.path.getmtime(path), path, head, body_raw))
+              except Exception:
+                  continue
+          if not reports:
+              print("no ld/clang crash reports found in " + base)
+              sys.exit(0)
+          reports.sort(key=lambda item: item[0], reverse=True)
+          for _, path, head, body_raw in reports[:2]:
+              print("=" * 60)
+              print("crash report: " + os.path.basename(path))
+              try:
+                  body = json.loads(body_raw)
+              except Exception:
+                  print("  body is not plain JSON; printing nothing further")
+                  continue
+              print("process: " + str(head.get("app_name")) + " " + str(head.get("app_version")))
+              print("procPath: " + str(body.get("procPath", "")))
+              print("exception: " + json.dumps(body.get("exception", {})))
+              print("termination: " + json.dumps(body.get("termination", {})))
+              images = body.get("usedImages", [])
+              threads = body.get("threads", [])
+              index = body.get("faultingThread")
+              if isinstance(index, int) and 0 <= index < len(threads):
+                  thread = threads[index]
+                  frames = thread.get("frames") or thread.get("backtrace", {}).get("frames", [])
+                  print(f"faulting thread {index}: {len(frames)} frames")
+                  for frame in frames[:60]:
+                      image_name = "?"
+                      image_index = frame.get("imageIndex", frame.get("img"))
+                      if isinstance(image_index, int) and 0 <= image_index < len(images):
+                          image_name = (
+                              images[image_index].get("name")
+                              or images[image_index].get("path")
+                              or "?"
+                          )
+                      symbol = frame.get("symbol", "")
+                      offset = frame.get("imageOffset", frame.get("image_offset", ""))
+                      print(f"  {image_name}  {symbol}  +{offset}")
+          sys.exit(0)
+          PY
