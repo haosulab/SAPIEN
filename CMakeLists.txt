@@ -87,6 +87,10 @@ endif()
 
 add_subdirectory("3rd_party/sapien-vulkan-2" EXCLUDE_FROM_ALL)
 
+if(APPLE AND TARGET astcenc-static)
+    target_compile_options(astcenc-static PRIVATE -Wno-error=overriding-option)
+endif()
+
 if (${SAPIEN_CUDA})
     add_subdirectory("3rd_party/simsense")
     set_target_properties(simsense PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib")

@@ -162,7 +162,9 @@ jobs:
           path: ./dist/*.whl
 
   build-mac:
-    runs-on: macos-15
+    runs-on: macos-26
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.6.app
     permissions:
       contents: write
     steps:
@@ -196,7 +198,11 @@ jobs:
           source ~/.bashrc
       - name: Build wheels
         shell: bash
-        run: "git config --global --add safe.directory '*' && ./scripts/build_mac.sh"
+        run: |
+          export SDKROOT="$(xcrun --sdk macosx26.5 --show-sdk-path)"
+          test "$SDKROOT" = "$DEVELOPER_DIR/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk"
+          echo "SDKROOT=$SDKROOT"
+          git config --global --add safe.directory '*' && ./scripts/build_mac.sh
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:

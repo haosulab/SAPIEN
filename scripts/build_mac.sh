@@ -24,7 +24,7 @@ function build() {
   fi
 
   pyenv exec pip install setuptools wheel || return 1
-  pyenv exec python setup.py bdist_wheel --build-dir=build --plat-name macosx_13_3_universal2 || return 1
+  pyenv exec python setup.py bdist_wheel --build-dir=build --plat-name macosx_26_0_universal2 || return 1
 
   CPTAG="cp${PY_MAJOR_MINOR/./}"
   ls "dist/"*-"${CPTAG}"-"${CPTAG}"-macosx*.whl || {
@@ -46,9 +46,8 @@ function build_with_retry() {
   }
 }
 
-# 3.15 is deferred until the official 3.15.0 release: no mac runner pyenv
-# bottle ships the 3.15.0rc3 definition. Re-add "build_with_retry 3.15" then.
 build_with_retry 3.11
 build_with_retry 3.12
 build_with_retry 3.13
 build_with_retry 3.14
+build_with_retry 3.15
