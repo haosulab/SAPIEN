@@ -1,0 +1,12 @@
+* Composite passes
+  The composite passes are full-screen passes for processing results produced in
+  previous passes. We use texture names to identify textures to read from and
+  write to. The following line will read from the lighting texture in deferred
+  pass and transparency pass.
+  
+  Multiple composite passes can be created with name =composite1.frag=,
+  =composite2.frag=, etc. The texture named =Lighting= be the final lighting
+  texture. The Composite pass is responsible for creating effects such as motion
+  blur, bloom, and SSR.
+
+  The implementation is exactly the same as deferred pass.

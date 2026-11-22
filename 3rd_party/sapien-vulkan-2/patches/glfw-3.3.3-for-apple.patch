@@ -1,0 +1,13 @@
+diff --git a/src/vulkan.c b/src/vulkan.c
+index 22c54e4..05598ce 100644
+--- a/src/vulkan.c
++++ b/src/vulkan.c
+@@ -57,6 +57,8 @@ GLFWbool _glfwInitVulkan(int mode)
+     _glfw.vk.handle = _glfw_dlopen("vulkan-1.dll");
+ #elif defined(_GLFW_COCOA)
+     _glfw.vk.handle = _glfw_dlopen("libvulkan.1.dylib");
++    if (!_glfw.vk.handle)
++        _glfw.vk.handle = _glfw_dlopen(getenv("SAPIEN_VULKAN_LIBRARY_PATH"));
+     if (!_glfw.vk.handle)
+         _glfw.vk.handle = _glfwLoadLocalVulkanLoaderNS();
+ #else

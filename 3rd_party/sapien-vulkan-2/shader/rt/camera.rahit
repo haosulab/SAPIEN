@@ -1,0 +1,50 @@
+#version 460
+#extension GL_EXT_ray_tracing : require
+#extension GL_EXT_scalar_block_layout : enable
+#extension GL_EXT_nonuniform_qualifier : enable
+
+#include "random.glsl"
+#include "ray.glsl"
+#include "geometry.glsl"
+#include "push_constant.glsl"
+
+layout(location = 0) rayPayloadInEXT Ray ray;
+
+layout(set = 1, binding = 1) readonly buffer GeometryInstances
+{
+  GeometryInstance i[];
+} geometryInstances;
+
+layout(set = 1, binding = 2) readonly buffer Materials
+{
+  Material m;
+} materials[];
+
+struct Object {
+  uvec4 segmentation;
+  float transparency;
+  int shadeFlat;
+  int padding0;
+  int padding1;
+};
+
+layout(set = 1, binding = 11) readonly buffer Objects {
+  Object o[];
+} objects;
+
+
+void main() {
+  Object obj = objects.o[gl_InstanceID];
+  if (obj.transparency > 0.99) {
+    ignoreIntersectionEXT;
+  }
+
+  // HACK: manual backface culling for bad models
+  int instanceId = gl_InstanceCustomIndexEXT + gl_GeometryIndexEXT;
+  uint materialIndex = geometryInstances.i[instanceId].materialIndex;
+  Material mat = materials[nonuniformEXT(materialIndex)].m;
+  bool isInside = gl_HitKindEXT == gl_HitKindBackFacingTriangleEXT;
+  if (isInside && mat.transmission < 1e-4) {
+    ignoreIntersectionEXT;
+  }
+}
