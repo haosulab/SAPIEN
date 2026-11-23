@@ -1,0 +1,16 @@
+* Transparency pass
+  Transparency pass is essentially a single forward shading pass, combining
+  gbuffer and deferred pass. It is designed to use all resources in the
+  gbuffer and deferred pass.
+
+  The following buffers are used
+#+begin_src glsl
+layout(binding = 0, set = 0) uniform SceneBuffer { ... } sceneBuffer;
+layout(binding = 0, set = 1) uniform CameraBuffer { ... } cameraBuffer;
+layout(binding = 0, set = 2) uniform ObjectBuffer { ... } objectBuffer;
+layout(binding = 0, set = 3) uniform MaterialBuffer { ... } materialBuffer;
+#+end_src
+  They should be exactly the same as ones used in the gbuffer and deferred passes.
+
+  The input textures should follow the ones used in gbuffer pass. The output
+  texture follow the same rules as before.

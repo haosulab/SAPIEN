@@ -1,0 +1,4 @@
+* Ambient Occlusion pass (optional)
+  The AO pass is a custom-resolution pass (usually half resolution) that happens
+  right after the gbuffer pass used to produce the AO map. The implementation is
+  exactly the same as deferred pass.

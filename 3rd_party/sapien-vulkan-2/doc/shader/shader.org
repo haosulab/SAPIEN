@@ -1,0 +1,28 @@
+#+TITLE:     Shaders
+#+AUTHOR:    Fanbo Xiang
+#+LANGUAGE:  en
+#+OPTIONS:   H:4 num:2 toc:4
+
+#+begin_export html
+<script type="text/javascript" src="http://livejs.com/live.js"></script>
+<style>
+  code {
+	  padding: 2px 4px;
+	  color: #242729;
+	  background-color: #e4e6e8;
+	  border-radius: 3px;
+  }
+</style>
+#+end_export
+
+#+SETUPFILE: theme-readtheorg.setup
+
+-----
+
+#+INCLUDE: "gbuffer.org"
+#+INCLUDE: "deferred.org"
+#+INCLUDE: "transparency.org"
+#+INCLUDE: "axis.org"
+#+INCLUDE: "composite.org"
+#+INCLUDE: "shadow.org"
+#+INCLUDE: "ao.org"

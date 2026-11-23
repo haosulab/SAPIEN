@@ -1,0 +1,996 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2021-02-22 Mon 13:55 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Shaders</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="Fanbo Xiang" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/css/readtheorg.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/js/readtheorg.js"></script>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">Shaders</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org499a499">1. Gbuffer pass</a>
+<ul>
+<li><a href="#orgc4430ef">1.1. Vertex Format</a></li>
+<li><a href="#orgf6a692b">1.2. Output texture</a></li>
+<li><a href="#orgb9f16f6">1.3. Object uniform buffer</a></li>
+<li><a href="#org0eb4a5d">1.4. Camera buffer </a></li>
+<li><a href="#org329b486">1.5. Material buffer</a>
+<ul>
+<li><a href="#org07b9069">Metallic pipeline</a></li>
+<li><a href="#orgea8b058">Specular pipeline</a></li>
+</ul>
+</li>
+<li><a href="#orgd1ba41f">1.6. Other information</a></li>
+</ul>
+</li>
+<li><a href="#org0c2955f">2. Deferred pass (Optional)</a>
+<ul>
+<li><a href="#orged684e7">2.1. Vertex shader</a></li>
+<li><a href="#orgae54f5c">2.2. Constants</a></li>
+<li><a href="#orge496974">2.3. Scene buffer</a></li>
+<li><a href="#org038c303">2.4. Shadow buffer</a></li>
+<li><a href="#orgd622d85">2.5. Camera buffer</a></li>
+<li><a href="#org7a0e0ac">2.6. Textures</a></li>
+<li><a href="#org6dbfda5">2.7. Output</a></li>
+</ul>
+</li>
+<li><a href="#org9b459eb">3. Transparency pass</a></li>
+<li><a href="#org6fb661a">4. Axis pass</a></li>
+<li><a href="#org6d57ad0">5. Composite passes</a></li>
+<li><a href="#org55509ff">6. Shadow pass (optional)</a></li>
+<li><a href="#orgb3cab35">7. Ambient Occlusion pass (optional)</a></li>
+</ul>
+</div>
+</div>
+<script type="text/javascript" src="http://livejs.com/live.js"></script>
+<style>
+  code {
+	  padding: 2px 4px;
+	  color: #242729;
+	  background-color: #e4e6e8;
+	  border-radius: 3px;
+  }
+</style>
+
+<hr />
+
+<div id="outline-container-org499a499" class="outline-2">
+<h2 id="org499a499"><span class="section-number-2">1</span> Gbuffer pass</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+Files: <code>gbuffer.vert</code>, <code>gbuffer.frag</code>
+</p>
+</div>
+
+<div id="outline-container-orgc4430ef" class="outline-3">
+<h3 id="orgc4430ef"><span class="section-number-3">1.1</span> Vertex Format</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+The following vertex attributes are supported
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">attribute</th>
+<th scope="col" class="org-left">layout</th>
+<th scope="col" class="org-left">type</th>
+<th scope="col" class="org-left">required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">position</td>
+<td class="org-left">location=0</td>
+<td class="org-left">float3</td>
+<td class="org-left">required</td>
+</tr>
+
+<tr>
+<td class="org-left">normal</td>
+<td class="org-left">location&gt;0</td>
+<td class="org-left">float3</td>
+<td class="org-left">optional</td>
+</tr>
+
+<tr>
+<td class="org-left">uv</td>
+<td class="org-left">location&gt;0</td>
+<td class="org-left">float2</td>
+<td class="org-left">optional</td>
+</tr>
+
+<tr>
+<td class="org-left">tangent</td>
+<td class="org-left">location&gt;0</td>
+<td class="org-left">float3</td>
+<td class="org-left">optional, requires normal</td>
+</tr>
+
+<tr>
+<td class="org-left">bitangent</td>
+<td class="org-left">location&gt;0</td>
+<td class="org-left">float3</td>
+<td class="org-left">optional, requires tangent</td>
+</tr>
+
+<tr>
+<td class="org-left">color</td>
+<td class="org-left">location&gt;0</td>
+<td class="org-left">float4</td>
+<td class="org-left">optional</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Other attributes of type <code>float</code>, <code>float2</code>, <code>float3</code>, and <code>float4</code> are also
+supported. They can be later set by the variable name.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgf6a692b" class="outline-3">
+<h3 id="orgf6a692b"><span class="section-number-3">1.2</span> Output texture</h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+Any texture that starts with <code>out</code> is a valid output texture. A texture named
+Tex should be specified as <code>outTex</code>. Later when used as samplers in deferred
+shading, it can be specified with <code>texSampler</code>. Supported texture formats are
+float4 and uint4. When textures are specified as float4, their data format
+will default to float, but it is possible to configure them to use unsigned
+char.
+</p>
+
+<p>
+The following output textures are recommended. They should probably be
+defined in the gbuffer pass.
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">name</th>
+<th scope="col" class="org-left">layout</th>
+<th scope="col" class="org-left">type</th>
+<th scope="col" class="org-left">required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">outAlbedo</td>
+<td class="org-left">any location</td>
+<td class="org-left">float4</td>
+<td class="org-left">required</td>
+</tr>
+
+<tr>
+<td class="org-left">outPosition</td>
+<td class="org-left">any location</td>
+<td class="org-left">float4</td>
+<td class="org-left">required</td>
+</tr>
+
+<tr>
+<td class="org-left">outNormal</td>
+<td class="org-left">any location</td>
+<td class="org-left">float4</td>
+<td class="org-left">required</td>
+</tr>
+
+<tr>
+<td class="org-left">outSpecular</td>
+<td class="org-left">any location</td>
+<td class="org-left">float4</td>
+<td class="org-left">required</td>
+</tr>
+
+<tr>
+<td class="org-left">outSegmentation</td>
+<td class="org-left">any location</td>
+<td class="org-left">uint4</td>
+<td class="org-left">required</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div id="outline-container-orgb9f16f6" class="outline-3">
+<h3 id="orgb9f16f6"><span class="section-number-3">1.3</span> Object uniform buffer</h3>
+<div class="outline-text-3" id="text-1-3">
+<p>
+Uniform buffers can be bound at any descriptor set, the struct name is used
+to identify them. For example, you may not change the name <code>ObjectBuffer</code>.
+However, they need to be consecutive integers starting from 0 for each pass.
+</p>
+<div class="org-src-container">
+<pre class="src src-glsl">layout(set = X, binding = 0) uniform ObjectBuffer { ... } objectBuffer;  // X=0,1,2,3
+</pre>
+</div>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">name</th>
+<th scope="col" class="org-left">type</th>
+<th scope="col" class="org-left">required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">modelMatrix</td>
+<td class="org-left">float4x4</td>
+<td class="org-left">required</td>
+</tr>
+
+<tr>
+<td class="org-left">prevModelMatrix</td>
+<td class="org-left">float4x4</td>
+<td class="org-left">optional (motion blur)</td>
+</tr>
+
+<tr>
+<td class="org-left">segmentation</td>
+<td class="org-left">uint4</td>
+<td class="org-left">required</td>
+</tr>
+
+<tr>
+<td class="org-left">transparency</td>
+<td class="org-left">float</td>
+<td class="org-left">optional (for visulaization)</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Other "simple" variables are also allowed, but it is not allowed to use
+structs. Object buffer is only available in the vertex shader.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org0eb4a5d" class="outline-3">
+<h3 id="org0eb4a5d"><span class="section-number-3">1.4</span> Camera buffer <a id="org8f8879f"></a></h3>
+<div class="outline-text-3" id="text-1-4">
+<div class="org-src-container">
+<pre class="src src-glsl">layout(set = Y, binding = 0) uniform CameraBuffer { ... } cameraBuffer;  // Y=0,1,2,3
+</pre>
+</div>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">name</th>
+<th scope="col" class="org-left">type</th>
+<th scope="col" class="org-left">required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">viewMatrix</td>
+<td class="org-left">float4x4</td>
+<td class="org-left">required</td>
+</tr>
+
+<tr>
+<td class="org-left">projectionMatrix</td>
+<td class="org-left">float4x4</td>
+<td class="org-left">required</td>
+</tr>
+
+<tr>
+<td class="org-left">viewMatrixInverse</td>
+<td class="org-left">float4x4</td>
+<td class="org-left">required</td>
+</tr>
+
+<tr>
+<td class="org-left">projectionMatrixInverse</td>
+<td class="org-left">float4x4</td>
+<td class="org-left">required</td>
+</tr>
+
+<tr>
+<td class="org-left">prevViewMatrix</td>
+<td class="org-left">float4x4</td>
+<td class="org-left">optional (motion blur)</td>
+</tr>
+
+<tr>
+<td class="org-left">prevViewMatrixInverse</td>
+<td class="org-left">float4x4</td>
+<td class="org-left">optional (motion blur)</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Other "simple" variables are also allowed, but it is not allowed to use
+structs. Object buffer is only available in the vertex shader.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org329b486" class="outline-3">
+<h3 id="org329b486"><span class="section-number-3">1.5</span> Material buffer</h3>
+<div class="outline-text-3" id="text-1-5">
+<p>
+You need to choose from the 2 rendering pipelines: <code>metallic pipeline</code> and <code>specular pipeline</code>.
+</p>
+<div class="org-src-container">
+<pre class="src src-glsl">layout(set = Z, binding = 0) uniform MaterialBuffer { ... } materialBuffer;  // Z=0,1,2,3
+</pre>
+</div>
+</div>
+<div id="outline-container-org07b9069" class="outline-4">
+<h4 id="org07b9069">Metallic pipeline</h4>
+<div class="outline-text-4" id="text-org07b9069">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">name</th>
+<th scope="col" class="org-left">type</th>
+<th scope="col" class="org-left">required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">baseColor</td>
+<td class="org-left">float4</td>
+<td class="org-left">required</td>
+</tr>
+
+<tr>
+<td class="org-left">fresnel</td>
+<td class="org-left">float</td>
+<td class="org-left">required</td>
+</tr>
+
+<tr>
+<td class="org-left">roughness</td>
+<td class="org-left">float</td>
+<td class="org-left">required</td>
+</tr>
+
+<tr>
+<td class="org-left">metallic</td>
+<td class="org-left">float</td>
+<td class="org-left">required</td>
+</tr>
+
+<tr>
+<td class="org-left">transparency</td>
+<td class="org-left">float</td>
+<td class="org-left">required</td>
+</tr>
+
+<tr>
+<td class="org-left">textureMask</td>
+<td class="org-left">int</td>
+<td class="org-left">required</td>
+</tr>
+</tbody>
+</table>
+
+<div class="org-src-container">
+<pre class="src src-glsl">layout(set = Z, binding = 1) uniform sampler2D colorTexture;
+layout(set = Z, binding = 2) uniform sampler2D roughnessTexture;
+layout(set = Z, binding = 3) uniform sampler2D normalTexture;
+layout(set = Z, binding = 4) uniform sampler2D metallicTexture;
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgea8b058" class="outline-4">
+<h4 id="orgea8b058">Specular pipeline</h4>
+<div class="outline-text-4" id="text-orgea8b058">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">name</th>
+<th scope="col" class="org-left">type</th>
+<th scope="col" class="org-left">required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">diffuse</td>
+<td class="org-left">float4</td>
+<td class="org-left">required</td>
+</tr>
+
+<tr>
+<td class="org-left">specular</td>
+<td class="org-left">float4</td>
+<td class="org-left">required</td>
+</tr>
+
+<tr>
+<td class="org-left">transparency</td>
+<td class="org-left">float</td>
+<td class="org-left">required</td>
+</tr>
+
+<tr>
+<td class="org-left">textureMask</td>
+<td class="org-left">int</td>
+<td class="org-left">required</td>
+</tr>
+</tbody>
+</table>
+
+<div class="org-src-container">
+<pre class="src src-glsl">layout(set = Z, binding = 1) uniform sampler2D diffuseTexture;
+layout(set = Z, binding = 2) uniform sampler2D specularTexture;
+layout(set = Z, binding = 3) uniform sampler2D normalTexture;
+</pre>
+</div>
+
+<p>
+Material buffer is only available in the fragment shader.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgd1ba41f" class="outline-3">
+<h3 id="orgd1ba41f"><span class="section-number-3">1.6</span> Other information</h3>
+<div class="outline-text-3" id="text-1-6">
+<p>
+If using multiple gbuffers, name them <code>gbuffer.{vert,frag}</code>,
+<code>gbuffre1.{vert,frag}</code>, <code>gbuffer2.{vert,frag}</code>. If a deferred pass exists,
+then the first gbuffer will have alpha blend disabled. All other gbuffers use
+standard alpha blend.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org0c2955f" class="outline-2">
+<h2 id="org0c2955f"><span class="section-number-2">2</span> Deferred pass (Optional)</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+Files: <code>deferred.vert</code>, <code>deferred.frag</code>
+</p>
+
+<p>
+Deferred pass runs after gbuffer pass to compute lighting in the pixel space.
+It is in general recommended, however, using a single gbuffer to do everything
+is possible.
+</p>
+</div>
+
+<div id="outline-container-orged684e7" class="outline-3">
+<h3 id="orged684e7"><span class="section-number-3">2.1</span> Vertex shader</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+The vertex shader should almost always be the following. It draws a triangle and clip it to a quad.
+</p>
+<div class="org-src-container">
+<pre class="src src-glsl">#version 450 
+layout (location = 0) out vec2 outUV;
+void main() 
+{
+  outUV = vec2((gl_VertexIndex &lt;&lt; 1) &amp; 2, gl_VertexIndex &amp; 2);
+  gl_Position = vec4(outUV * 2.0f + -1.0f, 0.0f, 1.0f);
+}
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgae54f5c" class="outline-3">
+<h3 id="orgae54f5c"><span class="section-number-3">2.2</span> Constants</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+These constants are determined when the scene is rendered. The shader
+pipeline is recreated if number of lights change. However, the buffers are
+pre-allocated according to the pre-specified values. So users should fill in
+the maximum number of directional lights and point lights.
+</p>
+
+<p>
+Other specialization constants of type <code>int</code> and <code>float</code> are also allowed.
+</p>
+<div class="org-src-container">
+<pre class="src src-glsl">layout (constant_id = 0) const int NUM_DIRECTIONAL_LIGHTS=...;
+layout (constant_id = 1) const int NUM_POINT_LIGHTS=...;
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orge496974" class="outline-3">
+<h3 id="orge496974"><span class="section-number-3">2.3</span> Scene buffer</h3>
+<div class="outline-text-3" id="text-2-3">
+<div class="org-src-container">
+<pre class="src src-glsl">struct PointLight {
+  vec4 position;
+  vec4 emission;
+};
+struct DirectionalLight {
+  vec4 direction;
+  vec4 emission;
+};
+layout(set = X, binding = 0) uniform SceneBuffer {
+  vec4 ambientLight;
+  DirectionalLight directionalLights[NUM_DIRECTIONAL_LIGHTS];
+  PointLight pointLights[NUM_POINT_LIGHTS];
+} sceneBuffer;
+</pre>
+</div>
+
+<p>
+Other "simple" variables are also allowed, but it is not allowed to use
+structs.
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org038c303" class="outline-3">
+<h3 id="org038c303"><span class="section-number-3">2.4</span> Shadow buffer</h3>
+<div class="outline-text-3" id="text-2-4">
+<p>
+When there are shadows, a shadow buffer should be declared at binding 1 of
+the scene descriptor. And the shadow texture arrays are attached at binding
+2, 3, 4.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-glsl">layout (constant_id = 2) const int NUM_POINT_SHADOWS=...;
+layout (constant_id = 3) const int NUM_DIRECTIONAL_SHADOWS=...;
+layout (constant_id = 4) const int NUM_CUSTOM_SHADOWS=...;
+
+struct ShadowCamera {
+  mat4 viewMatrix;
+  mat4 projectionMatrix;
+  mat4 viewMatrixInverse;
+  mat4 projectionMatrixInverse;
+};
+layout(set = X, binding = 1) uniform ShadowBuffer {
+  ShadowCamera pointShadowCameras[NUM_POINT_SHADOWS];
+  ShadowCamera directionalShadowCameras[NUM_DIRECTIONAL_SHADOWS];
+  ShadowCamera customShadowCameras[NUM_CUSTOM_SHADOWS];
+} shadowBuffer;
+layout(set = X, binding = 2) uniform sampler2D samplerPointShadowDepth[NUM_POINT_SHADOWS];
+layout(set = X, binding = 3) uniform sampler2D samplerPointShadowDepth[NUM_DIRECTIONAL_SHADOWS];
+layout(set = X, binding = 4) uniform sampler2D samplerPointShadowDepth[NUM_CUSTOM_SHADOWS];
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgd622d85" class="outline-3">
+<h3 id="orgd622d85"><span class="section-number-3">2.5</span> Camera buffer</h3>
+<div class="outline-text-3" id="text-2-5">
+<div class="org-src-container">
+<pre class="src src-glsl">layout(set = Y, binding = 0) uniform CameraBuffer { ... } cameraBuffer;
+</pre>
+</div>
+<p>
+It should have the same format as <a href="#org8f8879f">1.4</a>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org7a0e0ac" class="outline-3">
+<h3 id="org7a0e0ac"><span class="section-number-3">2.6</span> Textures</h3>
+<div class="outline-text-3" id="text-2-6">
+<p>
+The input textures will be the output textures in the gbuffer pass, bound at
+description set 2. The following refers to the outAlbedo.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-glsl">layout(set = Z, binding = 0) uniform sampler2D samplerAlbedo;
+</pre>
+</div>
+
+<p>
+Names ending with <code>Depth</code> are reserved for depth buffers. For example,
+<code>samplerGbufferDepth</code> refers to the depth output of the gbuffer pass.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org6dbfda5" class="outline-3">
+<h3 id="org6dbfda5"><span class="section-number-3">2.7</span> Output</h3>
+<div class="outline-text-3" id="text-2-7">
+<p>
+Any output texture should start with <code>out</code>. Texture with the same name are
+the same texture. Texture names may not end with <code>Depth</code>.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org9b459eb" class="outline-2">
+<h2 id="org9b459eb"><span class="section-number-2">3</span> Transparency pass</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+Transparency pass is essentially a single forward shading pass, combining
+gbuffer and deferred pass. It is designed to use all resources in the
+gbuffer and deferred pass.
+</p>
+
+<p>
+The following buffers are used
+</p>
+<div class="org-src-container">
+<pre class="src src-glsl">layout(binding = 0, set = 0) uniform SceneBuffer { ... } sceneBuffer;
+layout(binding = 0, set = 1) uniform CameraBuffer { ... } cameraBuffer;
+layout(binding = 0, set = 2) uniform ObjectBuffer { ... } objectBuffer;
+layout(binding = 0, set = 3) uniform MaterialBuffer { ... } materialBuffer;
+</pre>
+</div>
+<p>
+They should be exactly the same as ones used in the gbuffer and deferred passes.
+</p>
+
+<p>
+The input textures should follow the ones used in gbuffer pass. The output
+texture follow the same rules as before.
+</p>
+</div>
+</div>
+<div id="outline-container-org6fb661a" class="outline-2">
+<h2 id="org6fb661a"><span class="section-number-2">4</span> Axis pass</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+The axis pass draws plain colors for visualizing things like the coordinate
+axes. This pass is not supposed to be modified and it will not be used for
+off-screen rendering.
+</p>
+</div>
+</div>
+<div id="outline-container-org6d57ad0" class="outline-2">
+<h2 id="org6d57ad0"><span class="section-number-2">5</span> Composite passes</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+The composite passes are full-screen passes for processing results produced in
+previous passes. We use texture names to identify textures to read from and
+write to. The following line will read from the lighting texture in deferred
+pass and transparency pass.
+</p>
+
+<p>
+Multiple composite passes can be created with name <code>composite1.frag</code>,
+<code>composite2.frag</code>, etc. The texture named <code>Lighting</code> be the final lighting
+texture. The Composite pass is responsible for creating effects such as motion
+blur, bloom, and SSR.
+</p>
+
+<p>
+The implementation is exactly the same as deferred pass.
+</p>
+</div>
+</div>
+<div id="outline-container-org55509ff" class="outline-2">
+<h2 id="org55509ff"><span class="section-number-2">6</span> Shadow pass (optional)</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+Shadow pass happens before gbuffer pass, all kinds of shadow are unified into
+a single pipeline.
+</p>
+</div>
+</div>
+<div id="outline-container-orgb3cab35" class="outline-2">
+<h2 id="orgb3cab35"><span class="section-number-2">7</span> Ambient Occlusion pass (optional)</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+The AO pass is a custom-resolution pass (usually half resolution) that happens
+right after the gbuffer pass used to produce the AO map. The implementation is
+exactly the same as deferred pass.
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Fanbo Xiang</p>
+<p class="date">Created: 2021-02-22 Mon 13:55</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

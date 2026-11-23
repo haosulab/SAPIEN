@@ -1,0 +1,4 @@
+* Axis pass
+  The axis pass draws plain colors for visualizing things like the coordinate
+  axes. This pass is not supposed to be modified and it will not be used for
+  off-screen rendering.

@@ -129,6 +129,7 @@ def build_sapien(sapien_source_dir, sapien_build_dir):
 
     if os.environ.get("CUDA_PATH") is not None:
         cmake_args += ["-DSAPIEN_CUDA=ON"]
+        cmake_args += [f"-DCUDAToolkit_ROOT:PATH={os.environ['CUDA_PATH']}"]
     else:
         cmake_args += ["-DSAPIEN_CUDA=OFF"]
 
@@ -136,8 +137,16 @@ def build_sapien(sapien_source_dir, sapien_build_dir):
         f"-DCMAKE_BUILD_TYPE={cfg}",
         f"-DCMAKE_INSTALL_PREFIX={install_dir}",
         "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded",
+        # CMake 4 removed compatibility with cmake_minimum_required(<3.5),
+        # which the FetchContent'd zlib still declares; harmless no-op
+        # under CMake 3.
+        "-DCMAKE_POLICY_VERSION_MINIMUM=3.5",
     ]
-    
+
+    driver_library = os.environ.get("SAPIEN_CUDA_DRIVER_LIBRARY")
+    if driver_library:
+        cmake_args += [f"-DCUDA_cuda_driver_LIBRARY:FILEPATH={driver_library}"]
+
     if platform.system() == "Darwin":
         cmake_args += ["-DCMAKE_TOOLCHAIN_FILE=toolchains/macos.toolchain.cmake"]
 
@@ -210,6 +219,10 @@ class CMakeBuild(build_ext):
             f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=$<1:{extdir}>",
             f"-DPYTHON_EXECUTABLE={sys.executable}",
             f"-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded",
+            # CMake 4 removed compatibility with cmake_minimum_required(<3.5),
+            # which the FetchContent'd zlib still declares; harmless no-op
+            # under CMake 3.
+            "-DCMAKE_POLICY_VERSION_MINIMUM=3.5",
         ]
 
         deps_dir = os.path.join(self.sapien_build_dir, "_sapien_deps")
@@ -246,6 +259,10 @@ class CMakeBuild(build_ext):
             f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=$<1:{extdir}>",
             f"-DPYTHON_EXECUTABLE={sys.executable}",
             f"-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded",
+            # CMake 4 removed compatibility with cmake_minimum_required(<3.5),
+            # which the FetchContent'd zlib still declares; harmless no-op
+            # under CMake 3.
+            "-DCMAKE_POLICY_VERSION_MINIMUM=3.5",
         ]
         
         if args.debug:
@@ -298,9 +315,9 @@ class CMakeBuild(build_ext):
                 print("copy library from", library_dir)
                 for lib in os.listdir(library_dir):
                     if lib in [
-                        "libOpenImageDenoise.so.2.0.1",
-                        "libOpenImageDenoise_core.so.2.0.1",
-                        "libOpenImageDenoise_device_cuda.so.2.0.1",
+                        "libOpenImageDenoise.so.2.4.1",
+                        "libOpenImageDenoise_core.so.2.4.1",
+                        "libOpenImageDenoise_device_cuda.so.2.4.1",
                     ]:
                         shutil.copy(os.path.join(library_dir, lib), oidn_library_path)
 
@@ -370,12 +387,14 @@ project_python_home_dir = os.path.join("python", "py_package")
 package_data = {
     "sapien": [
         "__init__.pyi",
+        "physx/__init__.pyi",
         "pysapien/__init__.pyi",
         "pysapien/simsense.pyi",
         "pysapien/physx.pyi",
         "pysapien/render.pyi",
         "pysapien/math.pyi",
         "pysapien/internal_renderer.pyi",
+        "pysapien_pinocchio.pyi",
     ],
 }
 
@@ -392,7 +411,7 @@ setup(
     name="sapien",
     version=version,
     author="Sapien",
-    python_requires=">=3.7",
+    python_requires=">=3.11",
     author_email="sapienaicontact@gmail.com",
     description=["SAPIEN: A SimulAted Parted based Interactive ENvironment"],
     classifiers=[

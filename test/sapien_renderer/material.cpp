@@ -10,7 +10,7 @@ TEST(SapienRenderTexture, CreateMaterial) {
       std::filesystem::path(__FILE__).parent_path().parent_path() / "assets" / "test_texture.png";
   auto texture = std::make_shared<SapienRenderTexture2D>(
       meshfile.string(), 3, SapienRenderTexture2D::FilterMode::eNEAREST,
-      SapienRenderTexture2D::AddressMode::eMIRROR);
+      SapienRenderTexture2D::AddressMode::eMIRROR, false);
 
   auto material = std::make_shared<SapienRenderMaterial>(std::array<float, 4>{0.1, 0.2, 0.3, 0.9},
                                                          std::array<float, 4>{0.4, 0.5, 0.6, 0.8},
@@ -33,7 +33,7 @@ TEST(SapienRenderTexture, CreateMaterial) {
   EXPECT_FLOAT_EQ(material->getTransmissionRoughness(), 0.6);
 
   EXPECT_EQ(material->getEmissionTexture(), nullptr);
-  EXPECT_EQ(material->getDiffuseTexture(), nullptr);
+  EXPECT_EQ(material->getBaseColorTexture(), nullptr);
   EXPECT_EQ(material->getRoughnessTexture(), nullptr);
   EXPECT_EQ(material->getMetallicTexture(), nullptr);
   EXPECT_EQ(material->getNormalTexture(), nullptr);
@@ -72,11 +72,11 @@ TEST(SapienRenderTexture, CreateMaterial) {
   material->setEmissionTexture(nullptr);
   EXPECT_EQ(material->getEmissionTexture(), nullptr);
 
-  material->setDiffuseTexture(texture);
-  ASSERT_TRUE(material->getDiffuseTexture());
-  EXPECT_EQ(material->getDiffuseTexture()->getTexture(), texture->getTexture());
-  material->setDiffuseTexture(nullptr);
-  EXPECT_EQ(material->getDiffuseTexture(), nullptr);
+  material->setBaseColorTexture(texture);
+  ASSERT_TRUE(material->getBaseColorTexture());
+  EXPECT_EQ(material->getBaseColorTexture()->getTexture(), texture->getTexture());
+  material->setBaseColorTexture(nullptr);
+  EXPECT_EQ(material->getBaseColorTexture(), nullptr);
 
   material->setRoughnessTexture(texture);
   ASSERT_TRUE(material->getRoughnessTexture());

@@ -48,7 +48,25 @@ namespace pybind11::detail {
 template <> struct type_caster<CpuArrayHandle> {
   PYBIND11_TYPE_CASTER(CpuArrayHandle, _("numpy.ndarray"));
 
-  bool load(py::handle src, bool convert) { return false; }
+  bool load(py::handle src, bool convert) {
+    auto buf = py::array::ensure(src);
+    auto info = buf.request();
+
+    std::vector<int> shape;
+    std::vector<int> strides;
+    std::string type = info.format + std::to_string(info.itemsize);
+
+    for (auto s : info.shape) {
+      shape.push_back(s);
+    }
+    for (auto s : info.strides) {
+      strides.push_back(s);
+    }
+
+    value = CpuArrayHandle{.shape = shape, .strides = strides, .type = type, .ptr = info.ptr};
+
+    return true;
+  }
 
   static py::handle cast(CpuArrayHandle const &src, py::return_value_policy policy,
                          py::handle parent) {

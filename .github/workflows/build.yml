@@ -1,6 +1,7 @@
 name: Build
 
 on:
+  workflow_dispatch:
   push:
     branches: [main, dev]
 
@@ -12,22 +13,47 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      packages: read  # pull the private ghcr.io/haosulab/sapien-build-env image
     container:
-      image: fxiangucsd/sapien-build-env:3.9
+      image: ghcr.io/haosulab/sapien-build-env:1.1
+      credentials:
+        # same-repo GITHUB_TOKEN: the image workflow's push links the
+        # private package to this repository
+        username: ${{ github.actor }}
+        password: ${{ github.token }}
       env:
         CMAKE_BUILD_PARALLEL_LEVEL: 2
+        # setup.py enables SAPIEN_CUDA iff CUDA_PATH is set (the image
+        # deliberately does not bake it as ENV, so the CUDA-less aarch64
+        # image never sees it)
+        CUDA_PATH: /usr/local/cuda-12.8
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          submodules: "true"
           fetch-depth: 0
           fetch-tags: true
+          submodules: "true"
+      - name: Stage CUDA driver libraries for OIDN
+        run: |
+          curl --fail --silent --show-error --output /tmp/nvidia-driver-cuda-libs.rpm \
+            https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/nvidia-driver-cuda-libs-580.126.20-1.el8.x86_64.rpm
+          echo "365fb46442c843910afa9c937dbe6de428a8eb1c59c9a94a6adb201af57fb1e3  /tmp/nvidia-driver-cuda-libs.rpm" | sha256sum --check
+          dnf install -y cpio
+          mkdir -p /tmp/sapien-cuda-driver
+          rpm2cpio /tmp/nvidia-driver-cuda-libs.rpm | (cd /tmp/sapien-cuda-driver && cpio --no-absolute-filenames --quiet -idm)
+          if [ -e "$CUDA_PATH/lib64/stubs/libcuda.so" ] || [ -L "$CUDA_PATH/lib64/stubs/libcuda.so" ]; then
+            echo "CUDA link library already exists: $CUDA_PATH/lib64/stubs/libcuda.so" >&2
+            exit 1
+          fi
+          mkdir -p "$CUDA_PATH/lib64/stubs"
+          cp -a /tmp/sapien-cuda-driver/usr/lib64/libcuda.so* "$CUDA_PATH/lib64/stubs/"
+          echo "SAPIEN_CUDA_DRIVER_LIBRARY=$CUDA_PATH/lib64/stubs/libcuda.so" >> "$GITHUB_ENV"
       - name: Set up cmake cache
         uses: actions/cache@v3
         with:
           path: docker_sapien_build/_sapien_deps
-          key: ${{ runner.os }}.${{ hashFiles('**/*.cmake', '**/CMakeLists.txt') }}
+          key: ${{ runner.os }}.${{ hashFiles('**/*.cmake', '**/*.patch', '**/CMakeLists.txt') }}
       - name: Build wheels
         run: "git config --global --add safe.directory '*' && ./scripts/build.sh"
       - name: Upload wheels
@@ -40,17 +66,21 @@ jobs:
     runs-on: ubuntu-22.04-arm
     permissions:
       contents: write
+      packages: read  # pull the private ghcr.io/haosulab/sapien-build-env image
     container:
-      image: fxiangucsd/sapien-build-env-aarch64:3.9
+      image: ghcr.io/haosulab/sapien-build-env:1.1-aarch64
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ github.token }}
       env:
         CMAKE_BUILD_PARALLEL_LEVEL: 2
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          submodules: "true"
           fetch-depth: 0
           fetch-tags: true
+          submodules: "true"
       - name: Build wheels
         run: "git config --global --add safe.directory '*' && ./scripts/build_aarch64.sh"
       - name: Upload wheels
@@ -67,9 +97,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          submodules: "true"
           fetch-depth: 0
           fetch-tags: true
+          submodules: "true"
       - name: setup CUDA
         shell: bash
         run: |
@@ -100,17 +130,20 @@ jobs:
     needs: build-windows-sapien
     strategy:
       matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        python-version: ["3.11", "3.12", "3.13", "3.14", "3.15"]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          submodules: "true"
           fetch-depth: 0
           fetch-tags: true
+          submodules: "true"
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+          # "3.15" only matches 3.15.0rc3 until the final release; stable
+          # versions still resolve to their latest finals
+          allow-prereleases: true
       - name: Download SAPIEN
         uses: actions/download-artifact@v4
         with:
@@ -129,34 +162,47 @@ jobs:
           path: ./dist/*.whl
 
   build-mac:
-    runs-on: macos-14
+    runs-on: macos-26
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.6.app
     permissions:
       contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          submodules: "true"
           fetch-depth: 0
           fetch-tags: true
-      - name: Initialize submodules
-        run: git submodule update --init --recursive
+          submodules: "true"
       - name: Setup CMake 3.x
         uses: jwlawson/actions-setup-cmake@v2
         with:
           cmake-version: '3.31.x'
       - name: Set up pyenv
         shell: bash
+        env:
+          # brew auto-update is chronically broken on hosted mac runners
+          # (brew link failures), so it stays disabled per-command; but we
+          # run one deliberate update here because the image's cached pyenv
+          # bottle (2.8.4) predates the 3.15.0rc3 python definition and the
+          # upgrade must come from a fresh formula index
+          HOMEBREW_NO_AUTO_UPDATE: "1"
         run: |
-          brew update
-          brew install pyenv
+          brew update || true
+          brew install pyenv || true
+          brew upgrade pyenv || true
+          pyenv --version
           echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
           echo '[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
           echo 'eval "$(pyenv init - bash)"' >> ~/.bashrc
           source ~/.bashrc
       - name: Build wheels
         shell: bash
-        run: "git config --global --add safe.directory '*' && ./scripts/build_mac.sh"
+        run: |
+          export SDKROOT="$(xcrun --sdk macosx26.5 --show-sdk-path)"
+          test "$SDKROOT" = "$DEVELOPER_DIR/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk"
+          echo "SDKROOT=$SDKROOT"
+          git config --global --add safe.directory '*' && ./scripts/build_mac.sh
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
@@ -164,6 +210,7 @@ jobs:
           path: ./dist/*.whl
 
   release:
+    if: github.ref_name == 'dev'
     runs-on: ubuntu-latest
     needs:
       [
@@ -175,11 +222,6 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Download wheels
-        uses: actions/download-artifact@v4
-        with:
-          name: windows-wheel-3.10
-          path: wheelhouse
       - name: Download wheels
         uses: actions/download-artifact@v4
         with:
@@ -199,6 +241,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: windows-wheel-3.14
+          path: wheelhouse
+      - name: Download wheels
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-wheel-3.15
           path: wheelhouse
       - name: Download wheels
         uses: actions/download-artifact@v4

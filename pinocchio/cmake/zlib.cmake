@@ -3,11 +3,13 @@ if(TARGET zlibstatic)
 endif()
 
 include(FetchContent)
+find_package(Git REQUIRED)
 
 FetchContent_Declare(
     zlib
     GIT_REPOSITORY https://github.com/madler/zlib.git
     GIT_TAG        v1.2.11
+    PATCH_COMMAND  ${CMAKE_COMMAND} "-DGIT_EXECUTABLE=${GIT_EXECUTABLE}" "-DSOURCE_DIR=<SOURCE_DIR>" -P "${CMAKE_CURRENT_LIST_DIR}/../../cmake/zlib-apple-fdopen.cmake"
     OVERRIDE_FIND_PACKAGE
 )
 

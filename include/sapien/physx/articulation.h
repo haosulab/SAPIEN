@@ -29,7 +29,7 @@ class PhysxArticulationLinkComponent;
 class PhysxArticulationJoint;
 class PhysxEngine;
 
-class PhysxArticulation {
+class PhysxArticulation : public std::enable_shared_from_this<PhysxArticulation> {
 public:
   PhysxArticulation();
 
@@ -56,7 +56,6 @@ public:
   Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor> getQLimit();
 
   Eigen::Matrix<float, Eigen::Dynamic, 6, Eigen::RowMajor> getLinkIncomingJointForces();
-
 
   Eigen::VectorXf computePassiveForce(bool gravity, bool coriolisAndCentrifugal);
 
@@ -91,12 +90,26 @@ public:
   void internalAddPxArticulationToScene(Scene &scene);
 
   void createFixedTendon(std::vector<std::shared_ptr<PhysxArticulationLinkComponent>> const &chain,
-                         std::vector<float> const &coefficients,
-                         std::vector<float> const &recipCoefficients, float restLength,
-                         float offset, float stiffness, float damping, float low, float high,
-                         float limitStiffness);
+                         std::vector<float> const &coefficients, std::vector<float> const &recipCoefficients,
+                         float restLength, float offset, float stiffness, float damping, float low,
+                         float high, float limitStiffness);
+
+  std::shared_ptr<class PhysxArticulationSpatialTendon>
+  createSpatialTendon(std::vector<std::shared_ptr<PhysxArticulationLinkComponent>> const &links,
+                      std::vector<int> const &parents, std::vector<float> const &coefficients,
+                      std::vector<Vec3> const &linkOffsets, std::vector<float> const &restLengths,
+                      std::vector<std::tuple<float, float>> limits, float stiffness, float damping,
+                      float limitStiffness);
+
+  std::vector<std::shared_ptr<class PhysxArticulationSpatialTendon>> getSpatialTendons() const;
+
+  /** this_value = multiplier * other_value + offset */
+  void createMimicJoint(std::shared_ptr<PhysxArticulationJoint> thisJoint,
+                        std::shared_ptr<PhysxArticulationJoint> otherJoint, float multiplier, float offset);
 
   int getGpuIndex() const;
+  /** SAPIEN articulation buffer row, valid after gpu_init. */
+  int getGpuDataIndex() const;
 
   ~PhysxArticulation();
 
@@ -111,6 +124,8 @@ private:
 
   // links sorted in the added order, guaranteed to be topologically sorted
   std::vector<PhysxArticulationLinkComponent *> mLinks;
+
+  std::vector<std::shared_ptr<PhysxArticulationSpatialTendon>> mSpatialTendons;
 
   Scene *mScene{};
   uint32_t mLinksAddedToScene{};

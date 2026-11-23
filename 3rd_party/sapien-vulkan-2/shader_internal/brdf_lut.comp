@@ -1,0 +1,104 @@
+// -*- mode: glsl;-*-
+// https://graphics.rwth-aachen.de:9000/Glow/glow-extras/-/blob/develop/material/shader/glow-material/precalc-env-brdf-lut.csh
+#version 450
+layout(binding = 0, rg16f) uniform image2D outLUT;
+
+// http://holger.dammertz.org/stuff/notes_HammersleyOnHemisphere.html
+float radicalInverse_VdC(uint bits) {
+  bits = (bits << 16u) | (bits >> 16u);
+  bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
+  bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);
+  bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);
+  bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
+  return float(bits) * 2.3283064365386963e-10; // / 0x100000000
+}
+
+// http://holger.dammertz.org/stuff/notes_HammersleyOnHemisphere.html
+vec2 Hammersley(uint i, uint N) {
+  return vec2(float(i)/float(N), radicalInverse_VdC(i));
+}
+
+// Image-Based Lighting
+// http://www.unrealengine.com/files/downloads/2013SiggraphPresentationsNotes.pdf
+vec3 ImportanceSampleGGX( vec2 Xi, float Roughness, vec3 N )
+{
+  float PI = 3.1415926535897932384626433832795;
+
+  float a = Roughness * Roughness;
+
+  float Phi = 2 * PI * Xi.x;
+  float CosTheta = sqrt( (1 - Xi.y) / ( 1 + (a*a - 1) * Xi.y ) );
+  float SinTheta = sqrt( 1 - CosTheta * CosTheta );
+
+  vec3 H;
+  H.x = SinTheta * cos( Phi );
+  H.y = SinTheta * sin( Phi );
+  H.z = CosTheta;
+
+  vec3 UpVector = abs(N.z) < 0.999 ? vec3(0,0,1) : vec3(1,0,0);
+  vec3 TangentX = normalize( cross( UpVector, N ) );
+  vec3 TangentY = cross( N, TangentX );
+
+  // Tangent to world space
+  return TangentX * H.x + TangentY * H.y + N * H.z;
+}
+
+
+vec2 IntegrateBRDF( float Roughness, float dotNV )
+{
+  vec3 V = vec3( sqrt(1 - dotNV * dotNV), // sin
+                 0.0,
+                 dotNV ); // cos
+
+  float A = 0;
+  float B = 0;
+
+  vec3 N = vec3(0, 0, 1);
+
+  float k = Roughness / 2.0;
+  k = k * k;
+
+  const int samples = 1024;
+  for (int i = 0; i < samples; ++i)
+  {
+    vec2 Xi = Hammersley(i, samples);
+    vec3 H = ImportanceSampleGGX( Xi, Roughness, N );
+    vec3 L = 2 * dot(V, H) * H - V;
+
+    float dotNL = max(L.z, 0.0);
+    float dotNH = max(H.z, 0.0);
+    float dotVH = max(dot(V, H), 0.0);
+
+    if (dotNL > 0)
+    {
+      // original:
+      // float G = dotNL * dotNV / (mix(dotNV, 1, k) * mix(dotNL, 1, k));
+      // float G_Vis = G * dotVH / (dotNH * dotNV);
+
+      // slightly optimized
+      float G = dotNL / (mix(dotNV, 1, k) * mix(dotNL, 1, k));
+      float G_Vis = G * dotVH / dotNH;
+
+      float Fc = pow(1 - dotVH, 5);
+
+      A += (1 - Fc) * G_Vis;
+      B += Fc * G_Vis;
+    }
+  }
+
+  return vec2(A, B) / float(samples);
+}
+
+void main()
+{
+  uint x = gl_GlobalInvocationID.x;
+  uint y = gl_GlobalInvocationID.y;
+  ivec2 s = imageSize(outLUT);
+
+  if (x >= s.x || y >= s.y)
+    return; // out of bounds
+
+  vec2 lut = IntegrateBRDF((float(x) + .5) / float(s.x), (float(y) + .5) / float(s.y));
+
+  imageStore(outLUT, ivec2(x, y), vec4(lut, 0, 0));
+}

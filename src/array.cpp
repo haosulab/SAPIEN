@@ -91,6 +91,45 @@ bool CudaArrayHandle::isContiguous() const {
   return strides == ShapeToStrides(shape, typestrBytes(type));
 }
 
+CudaArrayHandle CudaArrayHandle::view(std::vector<int> newShape) const {
+  checkCongiguous();
+
+  int newSize = 1;
+  for (int x : newShape) {
+    newSize *= x;
+  }
+
+  int size = 1;
+  for (int x : shape) {
+    size *= x;
+  }
+
+  if (newSize != size) {
+    throw std::runtime_error("cuda array has incompatible shape");
+  }
+
+  return {.shape = newShape,
+          .strides = ShapeToStrides(newShape, typestrBytes(type)),
+          .type = type,
+          .cudaId = cudaId,
+          .ptr = ptr};
+}
+
+CudaArrayHandle CudaArrayHandle::slice(int start, int end) const {
+  if (start < 0 || end > shape.at(0) || end < start) {
+    throw std::runtime_error("invalid range [" + std::to_string(start) + ":" +
+                             std::to_string(end) + "] for slice. Valid range 0-" +
+                             std::to_string(shape.at(0)));
+  }
+  std::vector<int> newShape = shape;
+  newShape[0] = end - start;
+  return {.shape = newShape,
+          .strides = strides,
+          .type = type,
+          .cudaId = cudaId,
+          .ptr = (uint8_t *)ptr + strides.at(0) * start};
+}
+
 void CudaArrayHandle::checkCongiguous() const {
   if (!isContiguous()) {
     throw std::runtime_error("Assertion failed: cuda array is not congiguous");

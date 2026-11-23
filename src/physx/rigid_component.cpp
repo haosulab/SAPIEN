@@ -39,8 +39,7 @@ PhysxRigidBaseComponent::attachCollision(std::shared_ptr<PhysxCollisionShape> sh
   return std::static_pointer_cast<PhysxRigidBaseComponent>(shared_from_this());
 }
 
-std::vector<std::shared_ptr<PhysxCollisionShape>>
-PhysxRigidBaseComponent::getCollisionShapes() const {
+std::vector<std::shared_ptr<PhysxCollisionShape>> PhysxRigidBaseComponent::getCollisionShapes() const {
   return mCollisionShapes;
 }
 
@@ -85,16 +84,30 @@ bool PhysxRigidBaseComponent::isUsingDirectGPUAPI() const {
 }
 
 Vec3 PhysxRigidBodyComponent::getLinearVelocity() const {
-  // if (isUsingDirectGPUAPI()) {
-  //   throw std::runtime_error("failed to set velocity: not supported on GPU mode");
-  // }
+#ifdef SAPIEN_CUDA
+  if (auto entity = getEntity()) {
+    if (auto scene = entity->getScene()) {
+      auto system = std::dynamic_pointer_cast<PhysxSystemGpu>(scene->getPhysxSystem());
+      if (system && system->isInitialized()) {
+        throw std::runtime_error("getting linear velocity is not supported after GPU initialization");
+      }
+    }
+  }
+#endif
   return PxVec3ToVec3(getPxActor()->getLinearVelocity());
 }
 
 Vec3 PhysxRigidBodyComponent::getAngularVelocity() const {
-  // if (isUsingDirectGPUAPI()) {
-  //   throw std::runtime_error("failed to set velocity: not supported on GPU mode");
-  // }
+#ifdef SAPIEN_CUDA
+  if (auto entity = getEntity()) {
+    if (auto scene = entity->getScene()) {
+      auto system = std::dynamic_pointer_cast<PhysxSystemGpu>(scene->getPhysxSystem());
+      if (system && system->isInitialized()) {
+        throw std::runtime_error("getting angular velocity is not supported after GPU initialization");
+      }
+    }
+  }
+#endif
   return PxVec3ToVec3(getPxActor()->getAngularVelocity());
 }
 
@@ -106,29 +119,61 @@ Pose PhysxRigidBodyComponent::getCMassLocalPose() const {
   return PxTransformToPose(getPxActor()->getCMassLocalPose());
 }
 
+// TODO: test
+
 void PhysxRigidBodyComponent::setMass(float m) {
+  mMassProperties.mass = m;
+
+  m = std::max(m, 1e-6f);
   getPxActor()->setMass(m);
-  setAutoComputeMass(false);
 }
+
 void PhysxRigidBodyComponent::setInertia(Vec3 inertia) {
+  PxQuat q;
+  PxDiagonalize(mMassProperties.inertiaTensor, q);
+  mMassProperties.inertiaTensor =
+      mMassProperties.rotateInertia(PxMat33::createDiagonal({inertia.x, inertia.y, inertia.z}), q);
+
+  inertia.x = std::max(inertia.x, 1e-6f);
+  inertia.y = std::max(inertia.y, 1e-6f);
+  inertia.z = std::max(inertia.z, 1e-6f);
   getPxActor()->setMassSpaceInertiaTensor(Vec3ToPxVec3(inertia));
-  setAutoComputeMass(false);
 }
+
 void PhysxRigidBodyComponent::setCMassLocalPose(Pose const &pose) {
+  PxQuat q;
+  PxVec3 inertia = PxDiagonalize(mMassProperties.inertiaTensor, q);
+  mMassProperties.inertiaTensor =
+      mMassProperties.rotateInertia(PxMat33::createDiagonal({inertia.x, inertia.y, inertia.z}),
+                                    PxQuat(pose.q.x, pose.q.y, pose.q.z, pose.q.w));
+  mMassProperties.centerOfMass = {pose.p.x, pose.p.y, pose.p.z};
   getPxActor()->setCMassLocalPose(PoseToPxTransform(pose));
-  setAutoComputeMass(false);
 }
 
 void PhysxRigidDynamicComponent::setLinearVelocity(Vec3 const &v) {
-  // if (isUsingDirectGPUAPI()) {
-  //   throw std::runtime_error("failed to set velocity: not supported on GPU mode");
-  // }
+#ifdef SAPIEN_CUDA
+  if (auto entity = getEntity()) {
+    if (auto scene = entity->getScene()) {
+      auto system = std::dynamic_pointer_cast<PhysxSystemGpu>(scene->getPhysxSystem());
+      if (system && system->isInitialized()) {
+        throw std::runtime_error("setting linear velocity is not supported after GPU initialization");
+      }
+    }
+  }
+#endif
   getPxActor()->setLinearVelocity(Vec3ToPxVec3(v));
 }
 void PhysxRigidDynamicComponent::setAngularVelocity(Vec3 const &v) {
-  // if (isUsingDirectGPUAPI()) {
-  //   throw std::runtime_error("failed to set velocity: not supported on GPU mode");
-  // }
+#ifdef SAPIEN_CUDA
+  if (auto entity = getEntity()) {
+    if (auto scene = entity->getScene()) {
+      auto system = std::dynamic_pointer_cast<PhysxSystemGpu>(scene->getPhysxSystem());
+      if (system && system->isInitialized()) {
+        throw std::runtime_error("setting angular velocity is not supported after GPU initialization");
+      }
+    }
+  }
+#endif
   getPxActor()->setAngularVelocity(Vec3ToPxVec3(v));
 }
 
@@ -170,10 +215,6 @@ Pose PhysxRigidDynamicComponent::getKinematicTarget() const {
 
 void PhysxRigidDynamicComponent::setKinematic(bool kinematic) {
   getPxActor()->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, kinematic);
-  if (!kinematic && getAutoComputeMass()) {
-    // TODO: warn that mass will not be auto computed
-    setAutoComputeMass(false);
-  }
 }
 bool PhysxRigidDynamicComponent::isKinematic() const {
   return getPxActor()->getRigidBodyFlags().isSet(PxRigidBodyFlag::eKINEMATIC);
@@ -224,9 +265,7 @@ uint32_t PhysxRigidDynamicComponent::getSolverVelocityIterations() const {
   getPxActor()->getSolverIterationCounts(pos, vel);
   return vel;
 }
-float PhysxRigidDynamicComponent::getSleepThreshold() const {
-  return getPxActor()->getSleepThreshold();
-}
+float PhysxRigidDynamicComponent::getSleepThreshold() const { return getPxActor()->getSleepThreshold(); }
 
 void PhysxRigidStaticComponent::onSetPose(Pose const &pose) {
   getPxActor()->setGlobalPose(PoseToPxTransform(pose));
@@ -243,8 +282,7 @@ void PhysxRigidDynamicComponent::onSetPose(Pose const &pose) {
 
 void PhysxRigidStaticComponent::onAddToScene(Scene &scene) {
   auto system = scene.getPhysxSystem();
-  system->registerComponent(
-      std::static_pointer_cast<PhysxRigidStaticComponent>(shared_from_this()));
+  system->registerComponent(std::static_pointer_cast<PhysxRigidStaticComponent>(shared_from_this()));
 
 #ifdef SAPIEN_CUDA
   if (auto s = std::dynamic_pointer_cast<PhysxSystemGpu>(system)) {
@@ -262,15 +300,13 @@ void PhysxRigidStaticComponent::onRemoveFromScene(Scene &scene) {
   auto system = scene.getPhysxSystem();
   system->getPxScene()->removeActor(*getPxActor());
 
-  system->unregisterComponent(
-      std::static_pointer_cast<PhysxRigidStaticComponent>(shared_from_this()));
+  system->unregisterComponent(std::static_pointer_cast<PhysxRigidStaticComponent>(shared_from_this()));
 }
 
 void PhysxRigidDynamicComponent::onAddToScene(Scene &scene) {
   auto system = scene.getPhysxSystem();
 
-  system->registerComponent(
-      std::static_pointer_cast<PhysxRigidDynamicComponent>(shared_from_this()));
+  system->registerComponent(std::static_pointer_cast<PhysxRigidDynamicComponent>(shared_from_this()));
 
 #ifdef SAPIEN_CUDA
   if (auto s = std::dynamic_pointer_cast<PhysxSystemGpu>(system)) {
@@ -289,8 +325,7 @@ void PhysxRigidDynamicComponent::onRemoveFromScene(Scene &scene) {
   auto system = scene.getPhysxSystem();
   system->getPxScene()->removeActor(*getPxActor());
 
-  system->unregisterComponent(
-      std::static_pointer_cast<PhysxRigidDynamicComponent>(shared_from_this()));
+  system->unregisterComponent(std::static_pointer_cast<PhysxRigidDynamicComponent>(shared_from_this()));
 }
 
 std::shared_ptr<PhysxRigidBaseComponent>
@@ -299,10 +334,7 @@ PhysxRigidBodyComponent::attachCollision(std::shared_ptr<PhysxCollisionShape> sh
   mCollisionShapes.push_back(shape);
   shape->internalSetParent(this);
 
-  if (std::dynamic_pointer_cast<PhysxCollisionShapePlane>(shape)) {
-    setAutoComputeMass(false);
-  }
-  if (getAutoComputeMass()) {
+  if (shape->getDensity() > 0.0) {
     auto s = shape->getPxShape();
     auto m = PxRigidBodyExt::computeMassPropertiesFromShapes(&s, 1) * shape->getDensity();
     std::vector<PxMassProperties> mp = {mMassProperties, m};
@@ -326,58 +358,24 @@ void PhysxRigidBodyComponent::internalUpdateMass() {
   PxVec3 I = PxDiagonalize(mMassProperties.inertiaTensor, q);
 
   getPxActor()->setMass(std::max(mMassProperties.mass, 1e-6f));
-  getPxActor()->setMassSpaceInertiaTensor(
-      {std::max(I.x, 1e-6f), std::max(I.y, 1e-6f), std::max(I.z, 1e-6f)});
+  getPxActor()->setMassSpaceInertiaTensor({std::max(I.x, 1e-6f), std::max(I.y, 1e-6f), std::max(I.z, 1e-6f)});
   getPxActor()->setCMassLocalPose({mMassProperties.centerOfMass, q});
 }
 
-bool PhysxRigidBodyComponent::canAutoComputeMass() {
-  for (auto c : mCollisionShapes) {
-    auto type = c->getPxShape()->getGeometry().getType();
-    if (type == PxGeometryType::eHEIGHTFIELD || type == PxGeometryType::ePLANE) {
-      return false;
-    }
-  }
-  return true;
-}
+float PhysxRigidBodyComponent::getLinearDamping() const { return getPxActor()->getLinearDamping(); }
+void PhysxRigidBodyComponent::setLinearDamping(float damping) { getPxActor()->setLinearDamping(damping); }
 
-bool PhysxRigidBodyComponent::getAutoComputeMass() const { return mAutoComputeMass; }
-void PhysxRigidBodyComponent::setAutoComputeMass(bool enable) {
-  if (enable) {
-    if (!canAutoComputeMass()) {
-      throw std::runtime_error("failed to auto compute mass: attached shapes must be box, sphere, "
-                               "capsule, or convex mesh");
-    }
-    // TODO: finish this
-    throw std::runtime_error("compute mass is not implemented yet");
-  }
-  mAutoComputeMass = enable;
-}
+float PhysxRigidBodyComponent::getAngularDamping() const { return getPxActor()->getAngularDamping(); }
+void PhysxRigidBodyComponent::setAngularDamping(float damping) { getPxActor()->setAngularDamping(damping); }
 
-float PhysxRigidBodyComponent::getLinearDamping() const {
-  return getPxActor()->getLinearDamping();
-}
-void PhysxRigidBodyComponent::setLinearDamping(float damping) {
-  getPxActor()->setLinearDamping(damping);
-}
-
-float PhysxRigidBodyComponent::getAngularDamping() const {
-  return getPxActor()->getAngularDamping();
-}
-void PhysxRigidBodyComponent::setAngularDamping(float damping) {
-  getPxActor()->setAngularDamping(damping);
-}
-
-void PhysxRigidBodyComponent::addForceAtPoint(Vec3 const &force, Vec3 const &point,
-                                              PxForceMode::Enum mode) {
+void PhysxRigidBodyComponent::addForceAtPoint(Vec3 const &force, Vec3 const &point, PxForceMode::Enum mode) {
   if (isUsingDirectGPUAPI()) {
     throw std::runtime_error("failed to add force: not supported on GPU mode");
   }
   PxRigidBodyExt::addForceAtPos(*getPxActor(), Vec3ToPxVec3(force), Vec3ToPxVec3(point), mode);
 }
 
-void PhysxRigidBodyComponent::addForceTorque(Vec3 const &force, Vec3 const &torque,
-                                             PxForceMode::Enum mode) {
+void PhysxRigidBodyComponent::addForceTorque(Vec3 const &force, Vec3 const &torque, PxForceMode::Enum mode) {
   if (isUsingDirectGPUAPI()) {
     throw std::runtime_error("failed to add force torque: not supported on GPU mode");
   }
@@ -407,9 +405,7 @@ float PhysxRigidBodyComponent::getMaxDepenetrationVelocity() const {
 void PhysxRigidBodyComponent::setMaxContactImpulse(float impulse) {
   getPxActor()->setMaxContactImpulse(impulse);
 }
-float PhysxRigidBodyComponent::getMaxContactImpulse() const {
-  return getPxActor()->getMaxContactImpulse();
-}
+float PhysxRigidBodyComponent::getMaxContactImpulse() const { return getPxActor()->getMaxContactImpulse(); }
 
 void PhysxRigidDynamicComponent::internalSetGpuIndex(int index) {
   if (!isUsingDirectGPUAPI()) {
